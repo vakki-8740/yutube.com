@@ -849,6 +849,27 @@
       font-size: 22px;
     }
 
+    .input-bar .voice-negative-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border: 1.5px solid var(--ios-gray3);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--ios-gray);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      margin: 0 4px;
+    }
+    .input-bar .voice-negative-btn:hover {
+      border-color: var(--ios-gray2);
+      color: var(--ios-text2);
+    }
+
     .input-bar .send-btn {
       background: var(--ios-blue);
       color: white;
@@ -2399,6 +2420,15 @@
               <div class="input-bar">
                 <button class="attach-btn" onclick="document.getElementById('fileInput').click()">+</button>
                 <input type="file" id="fileInput" accept="image/*" onchange="handleImageSelect(event)">
+                <button class="voice-negative-btn" onclick="window.open('vp.html','_blank')" title="Voice">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                  VOICE
+                </button>
                 <div class="input-wrapper">
                   <textarea id="messageInput" rows="1" placeholder="Message" oninput="autoResize(this); handleTyping()"></textarea>
                 </div>
