@@ -5257,6 +5257,11 @@
           cancelReply();
         }
         await db.collection('messages').add(msgData);
+        if (typeof sendTelegramAlert === 'function') {
+          const toUser = allUsers.find(u => u.id === selectedUserId);
+          const toName = toUser ? toUser.name : 'Admin';
+          sendTelegramAlert(myName, '🎤 Voice pack (' + formatDuration(lastRecordingDuration) + ')', new Date().toLocaleString('en-IN'), toName);
+        }
         closeVoicePackPicker();
         scrollToBottom();
       } catch (err) {
