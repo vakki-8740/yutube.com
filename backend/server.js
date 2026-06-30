@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const { initDb } = require('./db');
 const voicePacksRouter = require('./routes/voicePacks');
+const imagesRouter = require('./routes/images');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/voice-packs', voicePacksRouter);
+app.use('/api/images', imagesRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });

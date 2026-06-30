@@ -6,6 +6,38 @@ const { pool } = require('../db');
 
 const router = express.Router();
 
+const imageStorage = multer.diskStorage({
+  destination: path.join(__dirname, '..', 'uploads'),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || '.jpg';
+    cb(null, uuidv4() + ext);
+  }
+});
+
+const uploadImage = multer({
+  storage: imageStorage,
+  limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid image format'), false);
+    }
+  }
+});
+
+router.post('/upload-image', uploadImage.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
+    const filePath = '/uploads/' + req.file.filename;
+    res.json({ url: filePath, name: req.file.originalname, size: req.file.size });
+  } catch (err) {
+    console.error('Image upload error:', err);
+    res.status(500).json({ error: 'Image upload failed' });
+  }
+});
+
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '..', 'uploads'),
   filename: (req, file, cb) => {
