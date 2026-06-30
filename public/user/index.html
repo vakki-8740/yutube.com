@@ -2701,22 +2701,56 @@
     }
 
     .vp-msg {
-      padding: 6px 12px !important;
+      padding: 8px 12px !important;
+      min-width: 180px;
+      user-select: none;
     }
     .vp-msg-inner {
       display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .vp-row {
+      display: flex;
       align-items: center;
       gap: 10px;
-      cursor: pointer;
-      min-width: 140px;
     }
-    .vp-msg-inner svg { flex-shrink: 0; }
-    .vp-dur {
-      font-size: 13px;
+    .vp-play-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--ios-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .vp-play-icon svg { fill: white; flex-shrink: 0; }
+    .vp-play-icon.playing { background: var(--ios-red); }
+    .vp-time {
+      font-size: 12px;
       color: var(--ios-gray);
       font-variant-numeric: tabular-nums;
     }
-    .vp-msg-inner.playing svg { animation: voicePlay 0.6s infinite steps(1); }
+    .vp-progress-wrap {
+      width: 100%;
+      height: 4px;
+      background: var(--ios-gray5);
+      border-radius: 2px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+    .vp-progress-fill {
+      height: 100%;
+      background: var(--ios-blue);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s linear;
+      pointer-events: none;
+    }
     .vp-timer {
       font-size: 24px;
       font-weight: 700;
@@ -3598,7 +3632,8 @@
         // Voice Pack
         if (msg.voice_pack) {
           const dur = msg.voice_pack.duration ? formatDuration(msg.voice_pack.duration) : '0:00';
-          content += '<div class="message-bubble vp-msg"><div class="vp-msg-inner" onclick="playVoiceMsg(this,\'' + msg.voice_pack.url + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span class="vp-dur">' + dur + '</span></div></div>';
+          const vpId = msg.id || 'vp_' + Date.now();
+          content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + msg.voice_pack.url + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner"><div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + dur + '</span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div></div></div>';
         }
         // Text
         if (msg.message) {
@@ -3660,7 +3695,8 @@
         }
         if (msg.voice_pack) {
           const dur = msg.voice_pack.duration ? formatDuration(msg.voice_pack.duration) : '0:00';
-          content += '<div class="message-bubble vp-msg"><div class="vp-msg-inner" onclick="playVoiceMsg(this,\'' + msg.voice_pack.url + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span class="vp-dur">' + dur + '</span></div></div>';
+          const vpId = msg.id || 'vp_' + Date.now();
+          content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + msg.voice_pack.url + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner"><div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + dur + '</span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div></div></div>';
         }
         if (msg.message) {
           content += '<div class="message-bubble">' + escapeHtml(msg.message) + '</div>';
@@ -4863,6 +4899,85 @@
       } catch (err) {
         list.innerHTML = '<div class="vp-empty">Failed to load voice packs. Check server connection.</div>';
       }
+    }
+
+    let vpChatAudio = null;
+    let vpChatInterval = null;
+    let vpChatIcon = null;
+    let vpChatTime = null;
+    let vpChatFill = null;
+    let vpChatWrapper = null;
+
+    function playVpChatMsg(iconEl) {
+      const wrapper = iconEl.closest('.vp-msg');
+      const url = wrapper.dataset.vpUrl;
+      const duration = parseFloat(wrapper.dataset.vpDur);
+      const timeEl = wrapper.querySelector('.vp-time');
+      const fillEl = wrapper.querySelector('.vp-progress-fill');
+
+      if (vpChatAudio && !vpChatAudio.paused && vpChatWrapper === wrapper) {
+        vpChatAudio.pause();
+        if (vpChatInterval) clearInterval(vpChatInterval);
+        iconEl.classList.remove('playing');
+        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        return;
+      }
+
+      if (vpChatAudio && vpChatAudio.paused && vpChatWrapper === wrapper) {
+        vpChatAudio.play();
+        iconEl.classList.add('playing');
+        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+        startVpProgress(wrapper, timeEl, fillEl, duration);
+        return;
+      }
+
+      if (vpChatAudio) {
+        vpChatAudio.pause();
+        if (vpChatInterval) clearInterval(vpChatInterval);
+        if (vpChatIcon) vpChatIcon.classList.remove('playing');
+        if (vpChatIcon) vpChatIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      }
+
+      vpChatAudio = new Audio(url);
+      vpChatWrapper = wrapper;
+      vpChatIcon = iconEl;
+      vpChatTime = timeEl;
+      vpChatFill = fillEl;
+
+      vpChatAudio.onended = () => {
+        iconEl.classList.remove('playing');
+        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        fillEl.style.width = '100%';
+        timeEl.textContent = formatDuration(duration) + ' / ' + formatDuration(duration);
+        if (vpChatInterval) clearInterval(vpChatInterval);
+        vpChatWrapper = null;
+      };
+
+      vpChatAudio.play();
+      iconEl.classList.add('playing');
+      iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+      startVpProgress(wrapper, timeEl, fillEl, duration);
+    }
+
+    function startVpProgress(wrapper, timeEl, fillEl, duration) {
+      if (vpChatInterval) clearInterval(vpChatInterval);
+      vpChatInterval = setInterval(() => {
+        if (vpChatAudio && !vpChatAudio.paused) {
+          const current = vpChatAudio.currentTime;
+          const pct = duration > 0 ? (current / duration) * 100 : 0;
+          fillEl.style.width = Math.min(pct, 100) + '%';
+          timeEl.textContent = formatDuration(current) + ' / ' + formatDuration(duration);
+        }
+      }, 200);
+    }
+
+    function seekVpChat(event, wrapEl) {
+      if (!vpChatAudio || vpChatWrapper !== wrapEl.closest('.vp-msg')) return;
+      const rect = wrapEl.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, x / rect.width));
+      const duration = parseFloat(wrapEl.closest('.vp-msg').dataset.vpDur);
+      vpChatAudio.currentTime = pct * duration;
     }
 
     function playVpAudio(btn, url, idx) {
