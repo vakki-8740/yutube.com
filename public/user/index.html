@@ -2838,6 +2838,32 @@
       transition: width 0.1s linear;
       pointer-events: none;
     }
+    .vp-download-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--ios-green, #34c759);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vp-download-icon svg { fill: white; flex-shrink: 0; }
+    .vp-spinner {
+      animation: vpSpin 1s linear infinite;
+    }
+    @keyframes vpSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .vp-downloaded-badge {
+      font-size: 10px;
+      color: var(--ios-green, #34c759);
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: auto;
+    }
     .vp-timer {
       font-size: 24px;
       font-weight: 700;
@@ -3455,6 +3481,7 @@
     });
 
     initDarkMode();
+    initVpCache();
 
     const db = firebase.firestore();
     const storage = firebase.storage();
@@ -3498,6 +3525,7 @@
     let telegramChatId = '-1004299305991';
     let broadcastMessages = [];
     let unsubBroadcast = null;
+    const downloadedVpUrls = new Set();
 
     const LOGO_URLS = [
       'https://i.ibb.co/PGtpdnv1/image.webp',
@@ -3907,7 +3935,12 @@
         if (msg.voice_pack) {
           const dur = msg.voice_pack.duration ? formatDuration(msg.voice_pack.duration) : '0:00';
           const vpId = msg.id || 'vp_' + Date.now();
-          content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + msg.voice_pack.url + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner"><div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + dur + '</span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div></div></div>';
+          const vpUrl = msg.voice_pack.url;
+          if (downloadedVpUrls.has(vpUrl)) {
+            content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + vpUrl + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner"><div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + dur + '</span><span class="vp-downloaded-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div></div></div>';
+          } else {
+            content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + vpUrl + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner" onclick="downloadVpChatMsg(this)"><div class="vp-row"><div class="vp-download-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></div><span class="vp-time vp-download-label">Tap to Download</span></div></div></div>';
+          }
         }
         // Text
         if (msg.message) {
@@ -3973,7 +4006,12 @@
         if (msg.voice_pack) {
           const dur = msg.voice_pack.duration ? formatDuration(msg.voice_pack.duration) : '0:00';
           const vpId = msg.id || 'vp_' + Date.now();
-          content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + msg.voice_pack.url + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner"><div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + dur + '</span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div></div></div>';
+          const vpUrl = msg.voice_pack.url;
+          if (downloadedVpUrls.has(vpUrl)) {
+            content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + vpUrl + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner"><div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + dur + '</span><span class="vp-downloaded-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div></div></div>';
+          } else {
+            content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + vpUrl + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner" onclick="downloadVpChatMsg(this)"><div class="vp-row"><div class="vp-download-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></div><span class="vp-time vp-download-label">Tap to Download</span></div></div></div>';
+          }
         }
         if (msg.message) {
           content += '<div class="message-bubble">' + escapeHtml(msg.message) + '</div>';
@@ -5189,14 +5227,92 @@
       }
     }
 
+    // ==================== IndexedDB Voice Pack Cache ====================
+    const VP_DB_NAME = 'VoicePackCache';
+    const VP_STORE = 'audio';
+
+    function openVpDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(VP_DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          if (!req.result.objectStoreNames.contains(VP_STORE)) req.result.createObjectStore(VP_STORE);
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function saveVpBlob(url, blob) {
+      const db = await openVpDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(VP_STORE, 'readwrite');
+        tx.objectStore(VP_STORE).put(blob, url);
+        tx.oncomplete = () => { db.close(); resolve(); };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+      });
+    }
+
+    async function getVpBlob(url) {
+      const db = await openVpDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(VP_STORE, 'readonly');
+        const req = tx.objectStore(VP_STORE).get(url);
+        req.onsuccess = () => { db.close(); resolve(req.result); };
+        req.onerror = () => { db.close(); reject(req.error); };
+      });
+    }
+
+    async function initVpCache() {
+      try {
+        const db = await openVpDB();
+        const tx = db.transaction(VP_STORE, 'readonly');
+        const req = tx.objectStore(VP_STORE).getAllKeys();
+        req.onsuccess = () => {
+          req.result.forEach(k => downloadedVpUrls.add(k));
+          db.close();
+        };
+        req.onerror = () => db.close();
+      } catch(e) {}
+    }
+
+    async function downloadVpChatMsg(innerEl) {
+      const wrapper = innerEl.closest('.vp-msg');
+      const url = wrapper.dataset.vpUrl;
+      const iconEl = innerEl.querySelector('.vp-download-icon');
+      const labelEl = innerEl.querySelector('.vp-download-label');
+
+      iconEl.innerHTML = '<svg class="vp-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="8" stroke-dasharray="45" stroke-dashoffset="10" stroke-linecap="round"/></svg>';
+      if (labelEl) labelEl.textContent = 'Downloading...';
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        await saveVpBlob(url, blob);
+        downloadedVpUrls.add(url);
+
+        const dur = wrapper.dataset.vpDur;
+        const formattedDur = formatDuration(parseFloat(dur));
+        innerEl.innerHTML = '<div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + formattedDur + '</span><span class="vp-downloaded-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div>';
+      } catch (err) {
+        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
+        if (labelEl) labelEl.textContent = 'Download Failed';
+        setTimeout(() => { if (labelEl) labelEl.textContent = 'Tap to Download'; }, 2500);
+      }
+    }
+
     let vpChatAudio = null;
     let vpChatInterval = null;
     let vpChatIcon = null;
     let vpChatTime = null;
     let vpChatFill = null;
     let vpChatWrapper = null;
+    let vpChatBlobUrl = null;
 
-    function playVpChatMsg(iconEl) {
+    let vpChatLoading = false;
+
+    async function playVpChatMsg(iconEl) {
+      if (vpChatLoading) return;
       const wrapper = iconEl.closest('.vp-msg');
       const url = wrapper.dataset.vpUrl;
       const duration = parseFloat(wrapper.dataset.vpDur);
@@ -5224,27 +5340,39 @@
         if (vpChatInterval) clearInterval(vpChatInterval);
         if (vpChatIcon) vpChatIcon.classList.remove('playing');
         if (vpChatIcon) vpChatIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        if (vpChatBlobUrl) { URL.revokeObjectURL(vpChatBlobUrl); vpChatBlobUrl = null; }
       }
 
-      vpChatAudio = new Audio(url);
-      vpChatWrapper = wrapper;
-      vpChatIcon = iconEl;
-      vpChatTime = timeEl;
-      vpChatFill = fillEl;
+      vpChatLoading = true;
+      try {
+        const blob = await getVpBlob(url);
+        if (!blob) { alert('Voice pack not found. Please download it again.'); vpChatLoading = false; return; }
+        const blobUrl = URL.createObjectURL(blob);
+        vpChatBlobUrl = blobUrl;
+        vpChatAudio = new Audio(blobUrl);
+        vpChatWrapper = wrapper;
+        vpChatIcon = iconEl;
+        vpChatTime = timeEl;
+        vpChatFill = fillEl;
 
-      vpChatAudio.onended = () => {
-        iconEl.classList.remove('playing');
-        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        fillEl.style.width = '100%';
-        timeEl.textContent = formatDuration(duration) + ' / ' + formatDuration(duration);
-        if (vpChatInterval) clearInterval(vpChatInterval);
-        vpChatWrapper = null;
-      };
+        vpChatAudio.onended = () => {
+          iconEl.classList.remove('playing');
+          iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+          fillEl.style.width = '100%';
+          timeEl.textContent = formatDuration(duration) + ' / ' + formatDuration(duration);
+          if (vpChatInterval) clearInterval(vpChatInterval);
+          vpChatWrapper = null;
+        };
 
-      vpChatAudio.play();
-      iconEl.classList.add('playing');
-      iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-      startVpProgress(wrapper, timeEl, fillEl, duration);
+        vpChatAudio.play();
+        iconEl.classList.add('playing');
+        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+        startVpProgress(wrapper, timeEl, fillEl, duration);
+      } catch (err) {
+        alert('Failed to load voice pack from local storage.');
+      } finally {
+        vpChatLoading = false;
+      }
     }
 
     function startVpProgress(wrapper, timeEl, fillEl, duration) {
