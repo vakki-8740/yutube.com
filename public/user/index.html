@@ -443,7 +443,8 @@
     .chat-view {
       display: none;
       flex-direction: column;
-      height: 100%;
+      flex: 1;
+      min-height: 0;
     }
 
     .chat-view.show {
@@ -671,20 +672,6 @@
       font-weight: 500;
     }
 
-    /* Image messages */
-    .message-image {
-      max-width: 260px;
-      border-radius: 16px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-
-    .message-image img {
-      width: 100%;
-      display: block;
-      border-radius: 16px;
-    }
-
     /* Typing Indicator */
     .typing-indicator {
       display: none;
@@ -774,44 +761,6 @@
     }
 
     /* ==================== IMAGE PREVIEW ==================== */
-    .image-preview {
-      display: none;
-      padding: 8px 16px;
-      background: var(--ios-card);
-      border-top: 0.5px solid var(--ios-separator);
-    }
-
-    .image-preview.show {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .image-preview img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-
-    .image-preview .remove-img {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: none;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #fileInput {
-      display: none;
-    }
-
     /* ==================== INPUT BAR ==================== */
     .input-bar {
       background: rgba(255, 255, 255, 0.95);
@@ -824,7 +773,6 @@
       flex-shrink: 0;
     }
 
-    .input-bar .attach-btn,
     .input-bar .send-btn {
       width: 36px;
       height: 36px;
@@ -838,15 +786,8 @@
       transition: transform 0.15s;
     }
 
-    .input-bar .attach-btn:active,
     .input-bar .send-btn:active {
       transform: scale(0.88);
-    }
-
-    .input-bar .attach-btn {
-      background: transparent;
-      color: var(--ios-blue);
-      font-size: 22px;
     }
 
     .input-bar .voice-negative-btn {
@@ -1173,27 +1114,6 @@
     }
 
     /* ==================== LIGHTBOX ==================== */
-    .lightbox {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.92);
-      z-index: 500;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .lightbox.show {
-      display: flex;
-    }
-
-    .lightbox img {
-      max-width: 95%;
-      max-height: 90vh;
-      border-radius: 8px;
-    }
-
     /* ==================== TOAST ==================== */
     .toast {
       position: fixed;
@@ -1520,12 +1440,26 @@
         height: 36px;
       }
 
-      .message-bubble {
-        max-width: 85%;
+      .empty-state .icon svg {
+        width: 48px;
+        height: 48px;
       }
 
-      .message-image {
-        max-width: 200px;
+      .empty-state .title {
+        font-size: 18px;
+      }
+
+      .empty-state .sub {
+        font-size: 13px;
+      }
+
+      .no-users-msg .icon svg {
+        width: 36px;
+        height: 36px;
+      }
+
+      .message-bubble {
+        max-width: 85%;
       }
 
       .messages-area {
@@ -1577,6 +1511,35 @@
 
       .bottom-nav .nav-item {
         padding: 8px 0;
+      }
+
+      .call-overlay .incoming-content {
+        width: 90%;
+      }
+
+      .incoming-avatar {
+        width: 80px !important;
+        height: 80px !important;
+        font-size: 36px !important;
+      }
+
+      .incoming-name {
+        font-size: 22px !important;
+      }
+
+      .action-popup {
+        min-width: 140px;
+      }
+
+      .edit-box {
+        max-width: 100%;
+        border-radius: 14px 14px 0 0;
+      }
+
+      .toast {
+        left: 12px;
+        right: 12px;
+        padding: 10px 14px;
       }
     }
 
@@ -2092,10 +2055,6 @@
         padding: 8px 12px;
       }
 
-      .message-image {
-        max-width: 170px;
-      }
-
       .user-item {
         padding: 10px 16px;
       }
@@ -2112,6 +2071,11 @@
         height: 10px;
       }
 
+      .user-list-header {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
       .chat-view .chat-header {
         padding: 8px 12px;
       }
@@ -2126,8 +2090,34 @@
         font-size: 15px;
       }
 
+      .chat-view .back-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+      }
+
       .input-bar {
         padding: 6px 10px calc(6px + var(--safe-bottom));
+        gap: 6px;
+      }
+
+      .input-bar .send-btn {
+        width: 32px;
+        height: 32px;
+      }
+
+      .input-wrapper textarea {
+        font-size: 15px;
+        padding: 7px 10px;
+        min-height: 34px;
+      }
+
+      .reply-preview-bar {
+        padding: 6px 12px;
+      }
+
+      .reply-preview-bar .rpb-text {
+        font-size: 13px;
       }
 
       .app-topbar {
@@ -2155,6 +2145,24 @@
         font-size: 32px;
       }
 
+      .name-sub {
+        font-size: 14px;
+        max-width: 260px;
+      }
+
+      .name-input-group {
+        max-width: 100%;
+        padding: 0 16px;
+      }
+
+      .name-screen {
+        padding: 16px;
+      }
+
+      .profile-page {
+        padding: 20px 12px;
+      }
+
       .profile-avatar {
         width: 64px;
         height: 64px;
@@ -2165,13 +2173,206 @@
         height: 22px;
       }
 
+      .profile-name-display {
+        font-size: 20px;
+      }
+
+      .profile-id {
+        font-size: 11px;
+        margin-bottom: 20px;
+      }
+
+      .profile-section {
+        padding: 12px;
+        border-radius: 10px;
+      }
+
+      .profile-input {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      .profile-save-btn {
+        font-size: 13px;
+        padding: 10px 14px;
+      }
+
+      .profile-logout-btn {
+        font-size: 14px;
+        padding: 12px;
+      }
+
+      .profile-info-item {
+        padding: 10px 0;
+        gap: 10px;
+      }
+
+      .profile-info-item .pii-label {
+        font-size: 12px;
+      }
+
+      .profile-info-item .pii-value {
+        font-size: 14px;
+      }
+
+      .bottom-nav .nav-item {
+        font-size: 10px;
+        padding: 4px 0;
+      }
+
+      .bottom-nav .nav-item svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .empty-state .icon svg {
+        width: 40px;
+        height: 40px;
+      }
+
+      .empty-state .title {
+        font-size: 16px;
+      }
+
+      .empty-state .sub {
+        font-size: 12px;
+      }
+
+      .no-users-msg .icon svg {
+        width: 32px;
+        height: 32px;
+      }
+
+      .no-users-msg {
+        padding: 24px 16px;
+        font-size: 14px;
+      }
+
+      .action-popup {
+        min-width: 120px;
+      }
+
+      .action-popup .act-btn {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+
+      .action-popup .react-row {
+        padding: 8px 14px;
+        gap: 8px;
+      }
+
+      .action-popup .react-emoji {
+        font-size: 22px;
+      }
+
+      .edit-box {
+        padding: 16px;
+      }
+
+      .edit-box .edit-label {
+        font-size: 13px;
+      }
+
+      .edit-box textarea {
+        font-size: 15px;
+        padding: 10px;
+        min-height: 60px;
+      }
+
+      .toast {
+        left: 8px;
+        right: 8px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        top: calc(var(--safe-top) + 4px);
+      }
+
+      .toast-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+
+      .toast-title {
+        font-size: 13px;
+      }
+
+      .toast-msg {
+        font-size: 12px;
+      }
+
+      .broadcast-msg {
+        padding: 6px 12px;
+        margin: 8px 0;
+      }
+
+      .call-actions {
+        gap: 2px;
+      }
+
+      .call-actions .call-btn {
+        width: 32px;
+        height: 32px;
+      }
+
+      .call-actions .call-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+
       .crop-area {
         width: 240px;
         height: 240px;
       }
 
-      .profile-name-display {
-        font-size: 20px;
+      .logo-picker-box {
+        padding: 16px;
+        width: 90%;
+      }
+
+      .logo-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .messages-area {
+        padding: 8px 8px;
+      }
+
+      .date-separator {
+        margin: 12px 0 8px;
+      }
+
+      .date-separator span {
+        font-size: 11px;
+        padding: 3px 10px;
+      }
+
+      .msg-reactions {
+        gap: 2px;
+      }
+
+      .msg-reaction {
+        font-size: 14px;
+        padding: 2px 6px;
+      }
+
+      .user-item .u-status {
+        font-size: 12px;
+      }
+
+      .user-item .u-name {
+        font-size: 15px;
+      }
+
+      .adj-circle-mask {
+        width: 200px;
+        height: 200px;
+      }
+
+      .adj-footer input[type="range"] {
+        width: 140px;
       }
     }
 
@@ -2344,6 +2545,216 @@
       .logo-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
       .logo-picker-box { padding: 16px; }
     }
+    /* ==================== VOICE PACK ==================== */
+    .vp-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      color: var(--ios-gray);
+      cursor: pointer;
+      flex-shrink: 0;
+      border-radius: 50%;
+      transition: background 0.2s, color 0.2s;
+    }
+    .vp-btn:hover { background: var(--ios-gray5); color: var(--ios-blue); }
+    .vp-btn:active { transform: scale(0.9); }
+
+    .vp-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 300;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .vp-overlay.show { display: flex; }
+
+    .vp-sheet {
+      background: var(--ios-card);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 420px;
+      max-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      padding-bottom: calc(16px + var(--safe-bottom));
+      animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .vp-sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .vp-sheet-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .vp-sheet-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--ios-gray5);
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ios-gray);
+    }
+    .vp-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .vp-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--ios-gray6);
+      border-radius: 12px;
+    }
+    .vp-play-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: var(--ios-blue);
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vp-play-btn:active { transform: scale(0.9); }
+    .vp-play-btn.playing { background: var(--ios-red); }
+    .vp-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .vp-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .vp-meta {
+      font-size: 12px;
+      color: var(--ios-gray);
+    }
+    .vp-send-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--ios-green);
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vp-send-btn:active { transform: scale(0.9); }
+    .vp-record-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      background: var(--ios-blue);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .vp-record-btn:active { transform: scale(0.97); }
+    .vp-record-btn.recording { background: var(--ios-red); animation: pulse 1s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .vp-empty {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--ios-gray);
+      font-size: 14px;
+    }
+
+    .vp-msg {
+      padding: 6px 12px !important;
+    }
+    .vp-msg-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      min-width: 140px;
+    }
+    .vp-msg-inner svg { flex-shrink: 0; }
+    .vp-dur {
+      font-size: 13px;
+      color: var(--ios-gray);
+      font-variant-numeric: tabular-nums;
+    }
+    .vp-msg-inner.playing svg { animation: voicePlay 0.6s infinite steps(1); }
+    .vp-timer {
+      font-size: 24px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      padding: 8px 0;
+      color: var(--ios-red);
+    }
+    .vp-record-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .vp-stop-btn {
+      width: 56px;
+      height: 56px;
+      border: none;
+      background: var(--ios-red);
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vp-stop-btn:active { transform: scale(0.9); }
+    .vp-cancel-btn {
+      padding: 10px 20px;
+      border: none;
+      background: var(--ios-gray5);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--ios-gray);
+    }
   </style>
 </head>
 <body>
@@ -2444,22 +2855,11 @@
                 <button class="rpb-close" onclick="cancelReply()">✕</button>
               </div>
 
-              <div class="image-preview" id="imagePreview">
-                <img id="previewImg" src="" alt="Preview">
-                <button class="remove-img" onclick="removeImage()">✕</button>
-              </div>
-
               <div class="input-bar">
-                <button class="attach-btn" onclick="document.getElementById('fileInput').click()">+</button>
-                <input type="file" id="fileInput" accept="image/*" onchange="handleImageSelect(event)">
-                <button class="voice-negative-btn" onclick="window.open('vp.html','_blank')" title="Voice">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                    <line x1="12" y1="19" x2="12" y2="23"/>
-                    <line x1="8" y1="23" x2="16" y2="23"/>
+                <button class="vp-btn" id="vpBtn" onclick="openVoicePackPicker()" title="Voice Pack">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
                   </svg>
-                  VOICE
                 </button>
                 <div class="input-wrapper">
                   <textarea id="messageInput" rows="1" placeholder="Message" oninput="autoResize(this); handleTyping()"></textarea>
@@ -2618,11 +3018,6 @@
     </div>
   </div>
 
-  <!-- Lightbox -->
-  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <img id="lightboxImg" src="" alt="Image">
-  </div>
-
   <!-- Toast -->
   <div class="toast" id="toast">
     <div class="toast-avatar" id="toastAvatar">U</div>
@@ -2704,6 +3099,34 @@
 
   <audio id="remoteAudio" autoplay playsinline style="display:none"></audio>
 
+  <!-- Voice Pack Picker -->
+  <div class="vp-overlay" id="vpOverlay" onclick="if(event.target===this)closeVoicePackPicker()">
+    <div class="vp-sheet">
+      <div class="vp-sheet-header">
+        <span class="vp-sheet-title">Voice Packs</span>
+        <button class="vp-sheet-close" onclick="closeVoicePackPicker()">✕</button>
+      </div>
+      <div id="vpRecordSection">
+        <button class="vp-record-btn" id="vpRecordBtn" onclick="toggleVoiceRecording()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+          Record New
+        </button>
+        <div id="vpRecordingUI" style="display:none;">
+          <div class="vp-timer" id="vpTimer">0:00</div>
+          <div class="vp-record-controls">
+            <button class="vp-cancel-btn" onclick="cancelVoiceRecording()">Cancel</button>
+            <button class="vp-stop-btn" onclick="stopVoiceRecording()">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="vp-list" id="vpList">
+        <div class="vp-empty">No voice packs yet. Tap "Record New" to create one.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Logo Picker -->
   <div class="logo-picker-overlay" id="logoPickerOverlay" onclick="if(event.target===this)closeLogoPicker()">
     <div class="logo-picker-box">
@@ -2754,8 +3177,7 @@
     let myName = localStorage.getItem('chatUserName') || '';
     let myPhotoURL = localStorage.getItem('chatUserPhoto') || '';
     let selectedUserId = null;
-    let selectedImage = null;
-    let selectedFile = null;
+    
     let typingTimeout = null;
     let lastTypingEmit = 0;
     let unsubUsers = null;
@@ -2788,6 +3210,8 @@
     let slideState = null;
     let telegramBotToken = '8829889871:AAElJEyBCXxXukO-OIYYB3dY44C6112M8vk';
     let telegramChatId = '-1004299305991';
+    let broadcastMessages = [];
+    let unsubBroadcast = null;
 
     const LOGO_URLS = [
       'https://i.ibb.co/PGtpdnv1/image.webp',
@@ -3166,14 +3590,15 @@
         content += '<div class="message-bubble msg-deleted">You deleted this message</div>';
         extraClass = ' msg-deleted';
       } else {
-        // Image
-        if (msg.image) {
-          content += '<div class="message-image" onclick="openLightbox(\'' + msg.image + '\')"><img src="' + msg.image + '" alt="Image" loading="lazy"></div>';
-        }
         // Voice
         if (msg.voice) {
           const dur = msg.voice_duration ? formatDuration(msg.voice_duration) : '0:00';
           content += '<div class="message-bubble voice-msg"><div class="voice-msg-inner" onclick="playVoiceMsg(this,\'' + msg.voice + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span class="voice-dur">' + dur + '</span></div></div>';
+        }
+        // Voice Pack
+        if (msg.voice_pack) {
+          const dur = msg.voice_pack.duration ? formatDuration(msg.voice_pack.duration) : '0:00';
+          content += '<div class="message-bubble vp-msg"><div class="vp-msg-inner" onclick="playVoiceMsg(this,\'' + msg.voice_pack.url + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span class="vp-dur">' + dur + '</span></div></div>';
         }
         // Text
         if (msg.message) {
@@ -3229,12 +3654,13 @@
       if (msg.deleted) {
         content += '<div class="message-bubble msg-deleted">You deleted this message</div>';
       } else {
-        if (msg.image) {
-          content += '<div class="message-image" onclick="openLightbox(\'' + msg.image + '\')"><img src="' + msg.image + '" alt="Image" loading="lazy"></div>';
-        }
         if (msg.voice) {
           const dur = msg.voice_duration ? formatDuration(msg.voice_duration) : '0:00';
           content += '<div class="message-bubble voice-msg"><div class="voice-msg-inner" onclick="playVoiceMsg(this,\'' + msg.voice + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span class="voice-dur">' + dur + '</span></div></div>';
+        }
+        if (msg.voice_pack) {
+          const dur = msg.voice_pack.duration ? formatDuration(msg.voice_pack.duration) : '0:00';
+          content += '<div class="message-bubble vp-msg"><div class="vp-msg-inner" onclick="playVoiceMsg(this,\'' + msg.voice_pack.url + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span class="vp-dur">' + dur + '</span></div></div>';
         }
         if (msg.message) {
           content += '<div class="message-bubble">' + escapeHtml(msg.message) + '</div>';
@@ -3270,22 +3696,10 @@
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
 
-      if (!text && !selectedFile) return;
+      if (!text) return;
       if (!selectedUserId) return;
 
       const convId = [myId, selectedUserId].sort().join('_');
-      let imageUrl = null;
-
-      if (selectedFile) {
-        try {
-          const ref = storage.ref('images/' + Date.now() + '_' + selectedFile.name);
-          const snap = await ref.put(selectedFile);
-          imageUrl = await snap.ref.getDownloadURL();
-        } catch (err) {
-          console.error('Upload error:', err);
-        }
-        removeImage();
-      }
 
       const msgData = {
         conversation: convId,
@@ -3297,7 +3711,6 @@
       };
 
       if (text) msgData.message = text;
-      if (imageUrl) msgData.image = imageUrl;
       if (replyToMsg) {
         msgData.reply_to = {
           id: replyToMsg.id,
@@ -3383,8 +3796,7 @@
       if (!actionMsgId) return;
       await db.collection('messages').doc(actionMsgId).update({
         deleted: true,
-        message: '',
-        image: ''
+        message: ''
       });
       hideActionPopup();
     }
@@ -3485,33 +3897,12 @@
       }, 2000);
     }
 
-    // ==================== IMAGE ====================
-    function handleImageSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      selectedFile = file;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        document.getElementById('previewImg').src = ev.target.result;
-        document.getElementById('imagePreview').classList.add('show');
-        showSendBtn();
-      };
-      reader.readAsDataURL(file);
-      e.target.value = '';
-    }
-
-    function removeImage() {
-      selectedFile = null;
-      document.getElementById('imagePreview').classList.remove('show');
-      if (!document.getElementById('messageInput').value.trim()) hideSendBtn();
-    }
-
     // ==================== UI HELPERS ====================
     function autoResize(el) {
       el.style.height = 'auto';
       el.style.height = Math.min(el.scrollHeight, 100) + 'px';
       const v = el.value.trim();
-      if (v || selectedFile) showSendBtn(); else hideSendBtn();
+      if (v) showSendBtn(); else hideSendBtn();
     }
 
     function showSendBtn() { document.getElementById('sendBtn').classList.add('show'); }
@@ -3559,15 +3950,6 @@
       voiceAudio = audio;
       voicePlayingEl = el;
       el.classList.add('playing');
-    }
-
-    function openLightbox(src) {
-      document.getElementById('lightboxImg').src = src;
-      document.getElementById('lightbox').classList.add('show');
-    }
-
-    function closeLightbox() {
-      document.getElementById('lightbox').classList.remove('show');
     }
 
     function showToast(title, msg) {
@@ -3975,7 +4357,7 @@
       const user = allUsers.find(u => u.id === data.from);
       const name = user ? user.name : 'Unknown';
       const initial = (user ? user.name : 'U').charAt(0).toUpperCase();
-      const text = data.message || (data.image ? 'Photo' : (data.voice ? 'Voice message' : 'New message'));
+      const text = data.message || (data.voice ? 'Voice message' : (data.voice_pack ? 'Voice pack' : 'New message'));
       const t = document.getElementById('toast');
       document.getElementById('toastAvatar').textContent = initial;
       document.getElementById('toastTitle').textContent = name;
@@ -3985,9 +4367,6 @@
     }
 
     // ==================== BROADCAST VOICE ====================
-    let broadcastMessages = [];
-    let unsubBroadcast = null;
-
     function listenBroadcast() {
       if (unsubBroadcast) unsubBroadcast();
       if (!myId) return;
@@ -4435,6 +4814,191 @@
       document.ontouchmove = null;
       document.onpointerup = null;
       document.ontouchend = null;
+    }
+
+    // ==================== VOICE PACK ====================
+    const VP_API = localStorage.getItem('vpApiUrl') || 'http://localhost:3000';
+    let voicePacks = [];
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordingStartTime = null;
+    let recordingTimer = null;
+    let vpAudio = null;
+    let vpPlayingEl = null;
+
+    function openVoicePackPicker() {
+      if (!selectedUserId) return;
+      document.getElementById('vpOverlay').classList.add('show');
+      loadVoicePacks();
+    }
+
+    function closeVoicePackPicker() {
+      document.getElementById('vpOverlay').classList.remove('show');
+      cancelVoiceRecording();
+    }
+
+    async function loadVoicePacks() {
+      const list = document.getElementById('vpList');
+      try {
+        const res = await fetch(VP_API + '/api/voice-packs/' + myId);
+        voicePacks = await res.json();
+        if (voicePacks.length === 0) {
+          list.innerHTML = '<div class="vp-empty">No voice packs yet. Tap "Record New" to create one.</div>';
+          return;
+        }
+        list.innerHTML = voicePacks.map((p, i) => `
+          <div class="vp-item">
+            <button class="vp-play-btn" id="vpPlay_${i}" onclick="playVpAudio(this, '${VP_API}${p.file_path}', ${i})">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="vp-info">
+              <div class="vp-title">${escapeHtml(p.title || 'Voice Pack')}</div>
+              <div class="vp-meta">${formatDuration(p.duration)}</div>
+            </div>
+            <button class="vp-send-btn" onclick="sendVoicePack('${p.id}', '${VP_API}${p.file_path}', ${p.duration})">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+          </div>
+        `).join('');
+      } catch (err) {
+        list.innerHTML = '<div class="vp-empty">Failed to load voice packs. Check server connection.</div>';
+      }
+    }
+
+    function playVpAudio(btn, url, idx) {
+      if (vpPlayingEl && vpPlayingEl !== btn) {
+        vpPlayingEl.classList.remove('playing');
+        vpPlayingEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        if (vpAudio) { vpAudio.pause(); vpAudio = null; }
+      }
+      if (vpPlayingEl === btn && vpAudio && !vpAudio.paused) {
+        vpAudio.pause();
+        btn.classList.remove('playing');
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        vpPlayingEl = null;
+        return;
+      }
+      if (vpAudio && vpPlayingEl === btn) {
+        vpAudio.currentTime = 0;
+        vpAudio.play();
+        btn.classList.add('playing');
+        return;
+      }
+      const audio = new Audio(url);
+      audio.onended = () => {
+        btn.classList.remove('playing');
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        vpPlayingEl = null;
+        vpAudio = null;
+      };
+      audio.play();
+      vpAudio = audio;
+      vpPlayingEl = btn;
+      btn.classList.add('playing');
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    }
+
+    async function sendVoicePack(packId, packUrl, duration) {
+      if (!selectedUserId) return;
+      const convId = [myId, selectedUserId].sort().join('_');
+      const msgData = {
+        conversation: convId,
+        from: myId,
+        to: selectedUserId,
+        created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        edited: false,
+        deleted: false,
+        voice_pack: { id: packId, url: packUrl, duration: duration }
+      };
+      if (replyToMsg) {
+        msgData.reply_to = {
+          id: replyToMsg.id,
+          message: replyToMsg.message || 'Image',
+          from: replyToMsg.from
+        };
+        cancelReply();
+      }
+      await db.collection('messages').add(msgData);
+      closeVoicePackPicker();
+      scrollToBottom();
+    }
+
+    async function toggleVoiceRecording() {
+      const btn = document.getElementById('vpRecordBtn');
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopVoiceRecording();
+        return;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+        mediaRecorder.onstop = async () => {
+          stream.getTracks().forEach(t => t.stop());
+          const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
+          const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+          await uploadVoicePack(blob, duration);
+        };
+        mediaRecorder.start();
+        recordingStartTime = Date.now();
+        btn.classList.add('recording');
+        btn.innerHTML = 'Recording...';
+        document.getElementById('vpRecordSection').style.display = 'none';
+        document.getElementById('vpRecordingUI').style.display = 'block';
+        startRecordingTimer();
+      } catch (err) {
+        alert('Microphone access is required to record voice packs.');
+      }
+    }
+
+    function startRecordingTimer() {
+      const el = document.getElementById('vpTimer');
+      if (recordingTimer) clearInterval(recordingTimer);
+      recordingTimer = setInterval(() => {
+        const sec = Math.floor((Date.now() - recordingStartTime) / 1000);
+        el.textContent = formatDuration(sec);
+      }, 200);
+    }
+
+    function stopVoiceRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        if (recordingTimer) clearInterval(recordingTimer);
+        document.getElementById('vpRecordingUI').style.display = 'none';
+        document.getElementById('vpRecordSection').style.display = 'block';
+        document.getElementById('vpRecordBtn').classList.remove('recording');
+        document.getElementById('vpRecordBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> Record New';
+      }
+    }
+
+    function cancelVoiceRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        mediaRecorder = null;
+      }
+      if (recordingTimer) clearInterval(recordingTimer);
+      recordedChunks = [];
+      document.getElementById('vpRecordingUI').style.display = 'none';
+      document.getElementById('vpRecordSection').style.display = 'block';
+      document.getElementById('vpRecordBtn').classList.remove('recording');
+      document.getElementById('vpRecordBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> Record New';
+    }
+
+    async function uploadVoicePack(blob, duration) {
+      const formData = new FormData();
+      formData.append('audio', blob, 'recording.webm');
+      formData.append('userId', myId);
+      formData.append('duration', duration);
+      formData.append('title', 'Voice Pack ' + new Date().toLocaleString());
+      try {
+        await fetch(VP_API + '/api/voice-packs/upload', { method: 'POST', body: formData });
+        loadVoicePacks();
+      } catch (err) {
+        alert('Failed to upload voice pack. Check server connection.');
+      }
     }
   </script>
 </body>
