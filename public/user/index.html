@@ -5335,7 +5335,13 @@
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         recordedChunks = [];
         lastRecordingBlob = null;
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        const opts = { mimeType: 'audio/webm' };
+        try {
+          const sup = MediaRecorder.isTypeSupported('audio/webm;codecs=opus');
+          if (sup) opts.mimeType = 'audio/webm;codecs=opus';
+          opts.audioBitsPerSecond = 24000;
+        } catch(e) {}
+        mediaRecorder = new MediaRecorder(stream, opts);
         mediaRecorder.ondataavailable = (e) => {
           if (e.data.size > 0) recordedChunks.push(e.data);
         };
