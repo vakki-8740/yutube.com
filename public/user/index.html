@@ -879,14 +879,16 @@
       inset: 0;
       z-index: 300;
       display: none;
+      align-items: center;
+      justify-content: center;
     }
 
     .action-overlay.show {
-      display: block;
+      display: flex;
     }
 
     .action-popup {
-      position: fixed;
+      position: relative;
       z-index: 301;
       background: var(--ios-card);
       border-radius: 14px;
@@ -894,6 +896,11 @@
       padding: 6px 0;
       min-width: 150px;
       display: none;
+      animation: popIn 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .action-popup.show {
@@ -4004,32 +4011,13 @@
     // ==================== MESSAGE ACTIONS ====================
     function showActionPopup(msgId, el, isOwn) {
       actionMsgId = msgId;
-      const popup = document.getElementById('actionPopup');
-      const rect = el.getBoundingClientRect();
-      const fromBottom = window.innerHeight - rect.top;
-      let top, left;
-
       // Show/hide edit/delete based on ownership
       document.getElementById('actEdit').style.display = isOwn ? 'flex' : 'none';
       document.getElementById('actEditSep').style.display = isOwn ? 'block' : 'none';
       document.getElementById('actDelete').style.display = isOwn ? 'flex' : 'none';
       document.getElementById('actDeleteSep').style.display = isOwn ? 'block' : 'none';
-
-      if (fromBottom > 200) {
-        top = rect.bottom + 4;
-        left = Math.min(rect.right - 160, window.innerWidth - 170);
-      } else {
-        top = rect.top - 150;
-        left = Math.min(rect.right - 160, window.innerWidth - 170);
-      }
-
-      if (left < 10) left = 10;
-      if (top < 10) top = 10;
-
-      popup.style.top = top + 'px';
-      popup.style.left = left + 'px';
-      popup.classList.add('show');
       document.getElementById('actionOverlay').classList.add('show');
+      document.getElementById('actionPopup').classList.add('show');
     }
 
     function hideActionPopup() {
