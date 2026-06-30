@@ -5276,16 +5276,17 @@
     }
 
     async function downloadVpChatMsg(innerEl) {
+      const iconEl = innerEl.querySelector('.vp-download-icon');
+      if (!iconEl) return;
       const wrapper = innerEl.closest('.vp-msg');
       const url = wrapper.dataset.vpUrl;
-      const iconEl = innerEl.querySelector('.vp-download-icon');
       const labelEl = innerEl.querySelector('.vp-download-label');
 
       iconEl.innerHTML = '<svg class="vp-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="8" stroke-dasharray="45" stroke-dashoffset="10" stroke-linecap="round"/></svg>';
       if (labelEl) labelEl.textContent = 'Downloading...';
 
       try {
-        const res = await fetch(url);
+        const res = await fetch(url, { cache: 'no-cache' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const blob = await res.blob();
         await saveVpBlob(url, blob);
@@ -5293,6 +5294,7 @@
 
         const dur = wrapper.dataset.vpDur;
         const formattedDur = formatDuration(parseFloat(dur));
+        innerEl.removeAttribute('onclick');
         innerEl.innerHTML = '<div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + formattedDur + '</span><span class="vp-downloaded-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div>';
       } catch (err) {
         iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
