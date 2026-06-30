@@ -3533,6 +3533,7 @@
     }
 
     let visibilityHandler = null;
+    let heartbeatInterval = null;
 
     // Auto-login if name exists
     if (myName) {
@@ -3578,8 +3579,9 @@
             name: myName,
             username: name,
             password: pass,
-            is_online: true,
-            created_at: firebase.firestore.FieldValue.serverTimestamp()
+        is_online: true,
+        last_active: firebase.firestore.FieldValue.serverTimestamp(),
+        created_at: firebase.firestore.FieldValue.serverTimestamp()
           });
         } else {
           // Login - find user by username
@@ -3605,7 +3607,7 @@
           myName = data.name || name;
           myPhotoURL = data.photoURL || '';
 
-          await db.collection('users').doc(myId).update({ is_online: true });
+          await db.collection('users').doc(myId).update({ is_online: true, last_active: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
         localStorage.setItem('chatUserId', myId);
@@ -3630,6 +3632,7 @@
         is_online: false,
         last_seen: firebase.firestore.FieldValue.serverTimestamp()
       });
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
       if (unsubUsers) unsubUsers();
       if (unsubMessages) unsubMessages();
       if (unsubTyping) unsubTyping();
@@ -3655,7 +3658,13 @@
         document.getElementById('myAvatar').innerHTML = '<span class="my-av-initial">' + initial + '</span>';
       }
 
-      db.collection('users').doc(myId).set({ is_online: true }, { merge: true });
+      db.collection('users').doc(myId).set({ is_online: true, last_active: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+
+      // Heartbeat - update last_active every 30 sec
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      heartbeatInterval = setInterval(() => {
+        db.collection('users').doc(myId).update({ last_active: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
+      }, 30000);
 
       // Tab visibility → online/offline
       if (visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler);
@@ -3665,8 +3674,15 @@
             is_online: false,
             last_seen: firebase.firestore.FieldValue.serverTimestamp()
           });
+          if (heartbeatInterval) clearInterval(heartbeatInterval);
+          heartbeatInterval = null;
         } else {
-          db.collection('users').doc(myId).set({ is_online: true }, { merge: true });
+          db.collection('users').doc(myId).set({ is_online: true, last_active: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+          if (!heartbeatInterval) {
+            heartbeatInterval = setInterval(() => {
+              db.collection('users').doc(myId).update({ last_active: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
+            }, 30000);
+          }
         }
       };
       document.addEventListener('visibilitychange', visibilityHandler);
@@ -3693,7 +3709,8 @@
         snapshot.forEach(doc => {
           if (doc.id === myId) return;
           const data = doc.data();
-          allUsers.push({ id: doc.id, name: data.name || 'User', photoURL: data.photoURL || '', is_online: data.is_online || false, last_seen: data.last_seen?.toDate?.()?.toISOString() || data.last_seen || null, created_at: data.created_at?.toDate?.()?.toISOString() || '' });
+          const isOnline = data.is_online && data.last_active?.toDate?.() ? (Date.now() - data.last_active.toDate().getTime() < 60000) : false;
+          allUsers.push({ id: doc.id, name: data.name || 'User', photoURL: data.photoURL || '', is_online: isOnline, last_seen: data.last_seen?.toDate?.()?.toISOString() || data.last_seen || null, created_at: data.created_at?.toDate?.()?.toISOString() || '' });
         });
         renderUsers();
       });
@@ -4479,6 +4496,7 @@
     function logout() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       if (visibilityHandler) { document.removeEventListener('visibilitychange', visibilityHandler); visibilityHandler = null; }
+      if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
       if (unsubUsers) unsubUsers();
       if (unsubMessages) unsubMessages();
       if (unsubTyping) unsubTyping();
