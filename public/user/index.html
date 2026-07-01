@@ -5150,7 +5150,12 @@
 
     function closeVoicePackPicker() {
       document.getElementById('vpOverlay').classList.remove('show');
-      cleanupRecorder();
+      if (mediaRecorder) {
+        try { if (mediaRecorder.state !== 'inactive') mediaRecorder.stop(); } catch(e) {}
+        if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        mediaRecorder = null;
+      }
+      if (recordingTimer) clearInterval(recordingTimer);
       if (vpPreviewAudio) { vpPreviewAudio.pause(); vpPreviewAudio = null; }
       recordedChunks = [];
       lastRecordingBlob = null;
@@ -5333,31 +5338,26 @@
       scrollToBottom();
     }
 
-    function getAudioOpts() {
-      const o = { mimeType: 'audio/webm', audioBitsPerSecond: 24000 };
-      try { if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) o.mimeType = 'audio/webm;codecs=opus'; } catch(e) {}
-      return o;
-    }
-
-    function cleanupRecorder() {
-      if (mediaRecorder) {
-        try { if (mediaRecorder.state !== 'inactive') mediaRecorder.stop(); } catch(e) {}
-        if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
-        mediaRecorder = null;
-      }
-      if (recordingTimer) { clearInterval(recordingTimer); recordingTimer = null; }
-    }
-
     async function startVoiceRecording() {
-      cleanupRecorder();
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         recordedChunks = [];
         lastRecordingBlob = null;
-        lastRecordingDuration = 0;
-        mediaRecorder = new MediaRecorder(stream, getAudioOpts());
+        const opts = { mimeType: 'audio/webm' };
+        try {
+          const sup = MediaRecorder.isTypeSupported('audio/webm;codecs=opus');
+          if (sup) opts.mimeType = 'audio/webm;codecs=opus';
+          opts.audioBitsPerSecond = 24000;
+        } catch(e) {}
+        mediaRecorder = new MediaRecorder(stream, opts);
         mediaRecorder.ondataavailable = (e) => {
           if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          lastRecordingDuration = Math.floor((Date.now() - recordingStartTime) / 1000);
+          lastRecordingBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+          showPreviewUI();
         };
         mediaRecorder.start();
         recordingStartTime = Date.now();
@@ -5381,20 +5381,19 @@
 
     function stopVoiceRecording() {
       if (mediaRecorder && mediaRecorder.state === 'recording') {
-        const stream = mediaRecorder.stream;
         mediaRecorder.stop();
-        if (recordingTimer) { clearInterval(recordingTimer); recordingTimer = null; }
-        lastRecordingDuration = Math.floor((Date.now() - recordingStartTime) / 1000);
-        lastRecordingBlob = new Blob(recordedChunks, { type: 'audio/webm' });
-        if (stream) stream.getTracks().forEach(t => t.stop());
-        mediaRecorder = null;
+        if (recordingTimer) clearInterval(recordingTimer);
         document.getElementById('vpRecordingUI').style.display = 'none';
-        showPreviewUI();
       }
     }
 
     function cancelVoiceRecording() {
-      cleanupRecorder();
+      if (mediaRecorder) {
+        try { if (mediaRecorder.state !== 'inactive') mediaRecorder.stop(); } catch(e) {}
+        if (mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        mediaRecorder = null;
+      }
+      if (recordingTimer) clearInterval(recordingTimer);
       recordedChunks = [];
       lastRecordingBlob = null;
       document.getElementById('vpRecordingUI').style.display = 'none';
