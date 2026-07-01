@@ -5317,40 +5317,20 @@
 
     async function sendVoicePack(packId, packUrl, duration) {
       if (!selectedUserId) return;
-      showUploading('Uploading voice pack...');
-      try {
-        const res = await fetch(packUrl);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const blob = await res.blob();
-        const filename = 'vp_' + myId + '_' + Date.now() + '.webm';
-        const ref = storage.ref('voice_packs/' + filename);
-        const snapshot = await ref.put(blob);
-        const url = await snapshot.ref.getDownloadURL();
-        const convId = [myId, selectedUserId].sort().join('_');
-        const msgData = {
-          conversation: convId, from: myId, to: selectedUserId,
-          created_at: firebase.firestore.FieldValue.serverTimestamp(),
-          edited: false, deleted: false,
-          voice_pack: { id: packId, url: url, duration: duration }
-        };
-        if (replyToMsg) {
-          msgData.reply_to = { id: replyToMsg.id, message: replyToMsg.message || 'Image', from: replyToMsg.from };
-          cancelReply();
-        }
-        await db.collection('messages').add(msgData);
-        hideUploading();
-        if (typeof sendTelegramAlert === 'function') {
-          const toUser = allUsers.find(u => u.id === selectedUserId);
-          const toName = toUser ? toUser.name : 'Admin';
-          sendTelegramAlert(myName, '🎤 Voice pack (' + formatDuration(duration) + ')', new Date().toLocaleString('en-IN'), toName);
-        }
-        closeVoicePackPicker();
-        scrollToBottom();
-      } catch (err) {
-        hideUploading();
-        alert('Failed to send voice pack.');
-        closeVoicePackPicker();
+      const convId = [myId, selectedUserId].sort().join('_');
+      const msgData = {
+        conversation: convId, from: myId, to: selectedUserId,
+        created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        edited: false, deleted: false,
+        voice_pack: { id: packId, url: packUrl, duration: duration }
+      };
+      if (replyToMsg) {
+        msgData.reply_to = { id: replyToMsg.id, message: replyToMsg.message || 'Image', from: replyToMsg.from };
+        cancelReply();
       }
+      await db.collection('messages').add(msgData);
+      closeVoicePackPicker();
+      scrollToBottom();
     }
 
     function getAudioOpts() {
@@ -5545,16 +5525,19 @@
       document.getElementById('vpSendRecBtn').disabled = true;
       document.getElementById('vpSendRecBtn').textContent = 'Sending...';
       try {
-        const filename = 'vp_' + myId + '_' + Date.now() + '.webm';
-        const ref = storage.ref('voice_packs/' + filename);
-        const snapshot = await ref.put(lastRecordingBlob);
-        const url = await snapshot.ref.getDownloadURL();
+        const formData = new FormData();
+        formData.append('audio', lastRecordingBlob, 'recording.webm');
+        formData.append('userId', myId);
+        formData.append('duration', lastRecordingDuration);
+        formData.append('title', 'Voice ' + new Date().toLocaleTimeString());
+        const res = await fetch(VP_API + '/api/voice-packs/upload', { method: 'POST', body: formData });
+        const data = await res.json();
         const convId = [myId, selectedUserId].sort().join('_');
         const msgData = {
           conversation: convId, from: myId, to: selectedUserId,
           created_at: firebase.firestore.FieldValue.serverTimestamp(),
           edited: false, deleted: false,
-          voice_pack: { id: filename, url: url, duration: lastRecordingDuration }
+          voice_pack: { id: data.id, url: VP_API + data.url, duration: data.duration }
         };
         if (replyToMsg) {
           msgData.reply_to = { id: replyToMsg.id, message: replyToMsg.message || 'Image', from: replyToMsg.from };
@@ -5571,7 +5554,7 @@
         scrollToBottom();
       } catch (err) {
         hideUploading();
-        alert('Failed to send voice pack.');
+        alert('Failed to send voice pack. Check server connection.');
         document.getElementById('vpSendRecBtn').disabled = false;
         document.getElementById('vpSendRecBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg> Send';
       }
