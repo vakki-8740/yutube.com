@@ -1036,12 +1036,6 @@ button:active {
   flex-shrink: 0;
 }
 
-.bottom-nav .nav-item svg {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
 .pii-icon svg {
   display: block;
   color: var(--ios-gray);
@@ -1292,64 +1286,6 @@ button:active {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* ==================== BOTTOM NAV ==================== */
-.bottom-nav {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: saturate(180%) blur(20px);
-  border-top: 0.5px solid var(--ios-separator);
-  display: flex;
-  flex-shrink: 0;
-  padding: 6px 0 calc(6px + var(--safe-bottom));
-  z-index: 100;
-}
-
-.bottom-nav .nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 0;
-  font-size: 11px;
-  color: var(--ios-gray);
-  cursor: pointer;
-  transition: color 0.15s;
-  border: none;
-  background: transparent;
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.bottom-nav .nav-item .nav-icon {
-  font-size: 22px;
-  line-height: 1;
-}
-
-.bottom-nav .nav-item.active {
-  color: var(--ios-blue);
-}
-
-.bottom-nav .nav-item:active {
-  opacity: 0.6;
-}
-
-/* ==================== PAGES ==================== */
-.pages-container {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-
-.pages-container .page {
-  display: none;
-  height: 100%;
-  width: 100%;
-}
-
-.pages-container .page.active {
-  display: flex;
 }
 
 /* ==================== PROFILE ==================== */
@@ -2969,7 +2905,7 @@ button:active {
 
             <div class="chat-view" id="chatView">
               <div class="chat-header">
-                <button class="back-btn" onclick="goBack()">â†</button>
+                <button class="back-btn" onclick="goBack()">←</button>
                 <div class="ch-avatar" id="chatAvatar">U</div>
                 <div class="ch-info">
                   <div class="ch-name" id="chatName">User</div>
@@ -3004,7 +2940,7 @@ button:active {
                   <div class="rpb-label" id="replyLabel">Replying</div>
                   <div class="rpb-text" id="replyText"></div>
                 </div>
-                <button class="rpb-close" onclick="cancelReply()">âœ•</button>
+                <button class="rpb-close" onclick="cancelReply()">✕</button>
               </div>
 
               <div class="input-bar">
@@ -3150,7 +3086,6 @@ button:active {
           <div class="voice-preview-sheet" id="voicePreviewUI" style="display:none;">
             <div class="voice-sheet-handle"></div>
             <div class="voice-sheet-content">
-              <audio id="voicePreviewAudio" style="display:none;"></audio>
               <div class="voice-preview-row">
                 <button class="voice-preview-play" id="voicePreviewPlay" onclick="toggleVoicePreview()">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
@@ -3212,11 +3147,11 @@ button:active {
   <div class="action-overlay" id="actionOverlay" onclick="hideActionPopup()">
     <div class="action-popup" id="actionPopup" onclick="event.stopPropagation()">
       <div class="react-row">
-        <span class="react-emoji" onclick="toggleReaction('ðŸ˜‚')">ðŸ˜‚</span>
-        <span class="react-emoji" onclick="toggleReaction('ðŸ˜«')">ðŸ˜«</span>
-        <span class="react-emoji" onclick="toggleReaction('ðŸ˜ž')">ðŸ˜ž</span>
-        <span class="react-emoji" onclick="toggleReaction('ðŸ‘')">ðŸ‘</span>
-        <span class="react-emoji" onclick="toggleReaction('â¤ï¸')">â¤ï¸</span>
+        <span class="react-emoji" onclick="toggleReaction('😂')">😂</span>
+        <span class="react-emoji" onclick="toggleReaction('🤣')">🤣</span>
+        <span class="react-emoji" onclick="toggleReaction('😢')">😢</span>
+        <span class="react-emoji" onclick="toggleReaction('👍')">👍</span>
+        <span class="react-emoji" onclick="toggleReaction('❤️')">❤️</span>
       </div>
       <div class="act-sep"></div>
       <button class="act-btn" id="actEdit" onclick="doEditMsg()">

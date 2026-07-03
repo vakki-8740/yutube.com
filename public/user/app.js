@@ -359,7 +359,7 @@ function showMainApp() {
     db.collection('users').doc(myId).update({ last_active: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
   }, 30000);
 
-  // Tab visibility â†’ online/offline
+  // Tab visibility → online/offline
   if (visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler);
   visibilityHandler = function() {
     if (document.hidden) {
@@ -516,8 +516,10 @@ function listenMessages() {
 
   const area = document.getElementById('messagesArea');
   const typingEl = document.getElementById('typingIndicator');
+  const recEl = document.getElementById('recordingIndicator');
   area.innerHTML = '';
   area.appendChild(typingEl);
+  area.appendChild(recEl);
 
   let lastDate = '';
   let isInitial = true;
@@ -1255,7 +1257,7 @@ function showNewMsgNotif(data) {
   const user = allUsers.find(u => u.id === data.from);
   const name = user ? user.name : 'Unknown';
   const initial = (user ? user.name : 'U').charAt(0).toUpperCase();
-  const text = data.message || (data.voice ? 'Voice message' : (data.image ? 'ðŸ–¼ï¸ Image' : 'New message'));
+  const text = data.message || (data.voice ? 'Voice message' : (data.image ? '🖼️ Image' : 'New message'));
   const t = document.getElementById('toast');
   document.getElementById('toastAvatar').textContent = initial;
   document.getElementById('toastTitle').textContent = name;
@@ -1634,7 +1636,7 @@ function playRingtone() {
 function sendTelegramAlert(userName, message, timestamp, toUser) {
   if (!telegramBotToken || !telegramChatId) return;
   const text = encodeURIComponent(
-    'ðŸ‘¤ User: ' + userName + '\nðŸ’¬ To: ' + toUser + '\nðŸ“ Message: ' + (message || '[Image]') + '\nâ° Time: ' + timestamp
+    '👤 User: ' + userName + '\n💬 To: ' + toUser + '\n📝 Message: ' + (message || '[Image]') + '\n⏰ Time: ' + timestamp
   );
   fetch('https://api.telegram.org/bot' + telegramBotToken + '/sendMessage?chat_id=' + telegramChatId + '&text=' + text)
     .catch(function(err) { console.error('Telegram error:', err); });
@@ -1757,7 +1759,7 @@ async function sendImage(input) {
     if (typeof sendTelegramAlert === 'function') {
       const toUser = allUsers.find(u => u.id === selectedUserId);
       const toName = toUser ? toUser.name : 'Admin';
-      sendTelegramAlert(myName, 'ðŸ“· Image', new Date().toLocaleString('en-IN'), toName);
+      sendTelegramAlert(myName, '📷 Image', new Date().toLocaleString('en-IN'), toName);
     }
     scrollToBottom();
   } catch (err) {
@@ -1868,7 +1870,6 @@ function showVoicePreview() {
 }
 
 function toggleVoicePreview() {
-  const audio = document.getElementById('voicePreviewAudio');
   const btn = document.getElementById('voicePreviewPlay');
   if (!voiceRecBlob) return;
   if (voiceRecPreviewAudio && !voiceRecPreviewAudio.paused) {
@@ -1955,26 +1956,23 @@ function uploadVoiceRecording() {
   xhr.send(formData);
 }
 
+const VOICE_EMPTY_HTML = '<div class="voice-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ios-gray3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><div>No recordings yet</div><div style="font-size:13px;margin-top:4px;">Tap the mic button below to record</div></div>';
+
 let _voiceLoadTimer = null;
 async function loadVoiceRecordings() {
   if (_voiceLoadTimer) clearTimeout(_voiceLoadTimer);
   return new Promise(resolve => {
     _voiceLoadTimer = setTimeout(async () => {
       const list = document.getElementById('voiceList');
-      const empty = document.getElementById('voiceEmpty');
       try {
         const res = await fetch(VOICE_API + '/api/voices/list?t=' + Date.now(), { cache: 'no-store' });
         if (!res.ok) throw new Error('Server error');
         const recordings = await res.json();
         if (recordings.length === 0) {
-          list.innerHTML = '';
-          const emptyClone = empty.cloneNode(true);
-          list.appendChild(emptyClone);
-          emptyClone.style.display = 'block';
+          list.innerHTML = VOICE_EMPTY_HTML;
           resolve();
           return;
         }
-        empty.style.display = 'none';
         list.innerHTML = recordings.map(r => {
           const user = (typeof allUsers !== 'undefined' && allUsers.find) ? allUsers.find(u => u.id === r.user_id) : null;
           const name = user ? user.name : 'User';
@@ -2005,11 +2003,11 @@ async function loadVoiceRecordings() {
         }).join('');
         resolve();
       } catch (err) {
-        if (list.children.length > 1 || (list.children.length === 1 && !list.children[0].classList.contains('voice-empty'))) {
+        if (list.querySelector('.voice-card')) {
           resolve();
           return;
         }
-        list.innerHTML = '<div class="voice-empty">Failed to load. Pull down to refresh.</div>';
+        list.innerHTML = '<div class="voice-empty">Failed to load. Tap mic to try again.</div>';
         resolve();
       }
     }, 300);
