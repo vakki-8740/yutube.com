@@ -2736,9 +2736,6 @@
 
     /* Recordings List */
     .voice-list-header { font-size: 13px; font-weight: 600; color: var(--ios-gray); text-transform: uppercase; letter-spacing: 0.8px; padding: 0 4px; display: flex; align-items: center; justify-content: space-between; }
-    .voice-refresh-btn { width: 32px; height: 32px; border: none; background: var(--ios-gray5); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ios-blue); transition: all 0.2s; }
-    .voice-refresh-btn:hover { background: var(--ios-blue); color: white; }
-    .voice-refresh-btn:active { transform: scale(0.88); }
     .voice-list { display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; }
     .voice-empty { text-align: center; padding: 48px 20px; color: var(--ios-gray); font-size: 15px; line-height: 1.5; }
     .voice-empty svg { margin-bottom: 12px; opacity: 0.4; }
@@ -3077,12 +3074,6 @@
         <div class="voice-page">
           <div class="voice-list-header">
             All Recordings
-            <button class="voice-refresh-btn" onclick="loadVoiceRecordings()" title="Refresh">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-              </svg>
-            </button>
           </div>
           <div class="voice-list" id="voiceList">
             <div class="voice-empty" id="voiceEmpty">
