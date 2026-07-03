@@ -1,0 +1,131 @@
+.name-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--ios-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.name-screen.hide {
+  opacity: 0;
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+.name-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0, 122, 255, 0.3);
+}
+
+.name-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.name-sub {
+  font-size: 15px;
+  color: var(--ios-gray);
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.4;
+  margin-bottom: 28px;
+}
+
+.name-input-group {
+  width: 100%;
+  max-width: 320px;
+}
+
+.auth-toggle {
+  display: flex;
+  background: var(--ios-gray6);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 16px;
+  border: 0.5px solid var(--ios-separator);
+}
+
+.auth-toggle .toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: var(--ios-gray);
+  transition: all 0.2s;
+  touch-action: manipulation;
+}
+
+.auth-toggle .toggle-btn.active {
+  background: var(--ios-card);
+  color: var(--ios-blue);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.auth-toggle .toggle-btn:active {
+  opacity: 0.7;
+}
+
+.name-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 0.5px solid var(--ios-separator);
+  border-radius: 12px;
+  font-size: 17px;
+  font-family: inherit;
+  background: var(--ios-card);
+  outline: none;
+  margin-bottom: 12px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.name-input:focus {
+  border-color: var(--ios-blue);
+}
+
+.name-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--ios-blue);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.name-btn:active {
+  transform: scale(0.97);
+  opacity: 0.8;
+}
+
+.name-error {
+  color: var(--ios-red);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+  display: none;
+}

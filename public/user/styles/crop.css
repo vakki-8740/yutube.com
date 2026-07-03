@@ -1,0 +1,131 @@
+/* ==================== CROP OVERLAY ==================== */
+.crop-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9999;
+  background: #000;
+  flex-direction: column;
+}
+
+.crop-overlay.show {
+  display: flex;
+}
+
+.crop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  padding-top: calc(12px + var(--safe-top));
+  flex-shrink: 0;
+}
+
+.crop-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 17px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.crop-header .crop-cancel {
+  color: var(--ios-gray3);
+}
+
+.crop-header .crop-save {
+  color: var(--ios-blue);
+  font-weight: 600;
+}
+
+.crop-header .crop-title {
+  color: white;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.crop-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.crop-area {
+  width: 280px;
+  height: 280px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.crop-area .crop-bg {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  cursor: grab;
+  touch-action: none;
+}
+
+.crop-area .crop-bg:active {
+  cursor: grabbing;
+}
+
+.crop-area .crop-grid {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 1px solid rgba(255,255,255,0.3);
+  pointer-events: none;
+}
+
+.crop-area .crop-grid::before,
+.crop-area .crop-grid::after {
+  content: '';
+  position: absolute;
+  background: rgba(255,255,255,0.15);
+}
+
+.crop-area .crop-grid::before {
+  top: 33.33%; bottom: 33.33%; left: 0; right: 0;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.crop-area .crop-grid::after {
+  left: 33.33%; right: 33.33%; top: 0; bottom: 0;
+  border-left: 1px solid rgba(255,255,255,0.2);
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+.crop-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 24px calc(16px + var(--safe-bottom));
+  flex-shrink: 0;
+}
+
+.crop-footer input[type="range"] {
+  -webkit-appearance: none;
+  width: 200px;
+  height: 3px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  outline: none;
+}
+
+.crop-footer input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}

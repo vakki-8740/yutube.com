@@ -1,0 +1,506 @@
+/* ==================== MOBILE 768px ==================== */
+@media (max-width: 768px) {
+  .main-content {
+    position: relative;
+  }
+
+  .user-list-area {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+
+  .user-list-area.hide {
+    transform: translateX(-100%);
+  }
+
+  .chat-area {
+    width: 100%;
+  }
+
+  .chat-view .back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+  }
+
+  .empty-state .icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .empty-state .title {
+    font-size: 18px;
+  }
+
+  .empty-state .sub {
+    font-size: 13px;
+  }
+
+  .no-users-msg .icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .message-bubble {
+    max-width: 85%;
+  }
+
+  .messages-area {
+    padding: 12px 12px;
+  }
+
+  .profile-page {
+    padding: 24px 16px;
+  }
+
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 32px;
+  }
+
+  .profile-section {
+    max-width: 100%;
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .profile-input-group {
+    flex-wrap: wrap;
+  }
+
+  .profile-input {
+    font-size: 15px;
+    padding: 10px 12px;
+  }
+
+  .profile-save-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .profile-logout-btn {
+    max-width: 100%;
+  }
+
+  .profile-name-display {
+    font-size: 22px;
+  }
+
+  .profile-id {
+    font-size: 12px;
+    margin-bottom: 24px;
+  }
+
+  .bottom-nav .nav-item {
+    padding: 8px 0;
+  }
+
+  .call-overlay .incoming-content {
+    width: 90%;
+  }
+
+  .incoming-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 36px !important;
+  }
+
+  .incoming-name {
+    font-size: 22px !important;
+  }
+
+  .action-popup {
+    min-width: 140px;
+  }
+
+  .edit-box {
+    max-width: 100%;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .toast {
+    left: 12px;
+    right: 12px;
+    padding: 10px 14px;
+  }
+}
+
+/* ==================== MOBILE CALL 768px ==================== */
+@media (max-width: 768px) {
+  .local-wrap { width: 90px; height: 130px; }
+  .slide-track { width: 240px; height: 50px; }
+  .slide-thumb { width: 46px; height: 46px; font-size: 18px; }
+  .incoming-avatar, .outgoing-avatar { width: 80px; height: 80px; font-size: 36px; }
+  .incoming-name, .outgoing-name { font-size: 22px; }
+  .decline-btn { width: 50px; height: 50px; font-size: 22px; }
+  .call-bottom-controls { gap: 20px; padding: 16px 12px; }
+  .ctrl-btn { width: 44px; height: 44px; font-size: 18px; }
+  .ctrl-btn.end-call { width: 48px; height: 48px; }
+}
+
+/* ==================== SMALL MOBILE 420px ==================== */
+@media (max-width: 420px) {
+  .message-bubble {
+    max-width: 90%;
+    font-size: 15px;
+    padding: 8px 12px;
+  }
+
+  .user-item {
+    padding: 10px 16px;
+  }
+
+  .user-item .u-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .user-item .u-online-dot,
+  .user-item .u-offline-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .user-list-header {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .chat-view .chat-header {
+    padding: 8px 10px;
+    gap: 8px;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .chat-view .ch-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .chat-view .ch-name {
+    font-size: 15px;
+  }
+
+  .chat-view .back-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .input-bar {
+    padding: 6px 8px calc(6px + var(--safe-bottom));
+    gap: 5px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .input-bar .img-btn { width: 34px; height: 34px; flex-shrink: 0; }
+  .input-bar .img-btn svg { width: 18px; height: 18px; }
+
+  .input-bar .voice-negative-btn { padding: 5px 6px; font-size: 10px; flex-shrink: 1; min-width: 0; }
+
+  .input-bar .send-btn {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .input-wrapper textarea {
+    font-size: 15px;
+    padding: 7px 10px;
+    min-height: 34px;
+  }
+
+  .reply-preview-bar {
+    padding: 6px 12px;
+  }
+
+  .reply-preview-bar .rpb-text {
+    font-size: 13px;
+  }
+
+  .app-topbar {
+    padding: 10px 16px 10px;
+    padding-top: calc(10px + var(--safe-top));
+  }
+
+  .app-topbar .my-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .app-topbar .app-title {
+    font-size: 18px;
+  }
+
+  .name-title {
+    font-size: 24px;
+  }
+
+  .name-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 32px;
+  }
+
+  .name-sub {
+    font-size: 14px;
+    max-width: 260px;
+  }
+
+  .name-input-group {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .name-screen {
+    padding: 16px;
+  }
+
+  .profile-page {
+    padding: 20px 12px;
+  }
+
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+  }
+
+  .profile-avatar .pa-camera {
+    height: 22px;
+  }
+
+  .profile-name-display {
+    font-size: 20px;
+  }
+
+  .profile-id {
+    font-size: 11px;
+    margin-bottom: 20px;
+  }
+
+  .profile-section {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .profile-input {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .profile-save-btn {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .profile-logout-btn {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .profile-info-item {
+    padding: 10px 0;
+    gap: 10px;
+  }
+
+  .profile-info-item .pii-label {
+    font-size: 12px;
+  }
+
+  .profile-info-item .pii-value {
+    font-size: 14px;
+  }
+
+  .bottom-nav .nav-item {
+    font-size: 10px;
+    padding: 4px 0;
+  }
+
+  .bottom-nav .nav-item svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .empty-state .icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .empty-state .title {
+    font-size: 16px;
+  }
+
+  .empty-state .sub {
+    font-size: 12px;
+  }
+
+  .no-users-msg .icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .no-users-msg {
+    padding: 24px 16px;
+    font-size: 14px;
+  }
+
+  .action-popup {
+    min-width: 120px;
+  }
+
+  .action-popup .act-btn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .action-popup .react-row {
+    padding: 8px 14px;
+    gap: 8px;
+  }
+
+  .action-popup .react-emoji {
+    font-size: 22px;
+  }
+
+  .edit-box {
+    padding: 16px;
+  }
+
+  .edit-box .edit-label {
+    font-size: 13px;
+  }
+
+  .edit-box textarea {
+    font-size: 15px;
+    padding: 10px;
+    min-height: 60px;
+  }
+
+  .toast {
+    left: 8px;
+    right: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    top: calc(var(--safe-top) + 4px);
+  }
+
+  .toast-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .toast-title {
+    font-size: 13px;
+  }
+
+  .toast-msg {
+    font-size: 12px;
+  }
+
+  .broadcast-msg {
+    padding: 6px 12px;
+    margin: 8px 0;
+  }
+
+  .call-actions {
+    gap: 2px;
+  }
+
+  .call-actions .call-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .call-actions .call-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .crop-area {
+    width: 240px;
+    height: 240px;
+  }
+
+  .logo-picker-box {
+    padding: 16px;
+    width: 90%;
+  }
+
+  .logo-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .messages-area {
+    padding: 8px 8px;
+  }
+
+  .date-separator {
+    margin: 12px 0 8px;
+  }
+
+  .date-separator span {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .msg-reactions {
+    gap: 2px;
+  }
+
+  .msg-reaction {
+    font-size: 14px;
+    padding: 2px 6px;
+  }
+
+  .user-item .u-status {
+    font-size: 12px;
+  }
+
+  .user-item .u-name {
+    font-size: 15px;
+  }
+
+  .adj-circle-mask {
+    width: 200px;
+    height: 200px;
+  }
+
+  .adj-footer input[type="range"] {
+    width: 140px;
+  }
+}
+
+/* ==================== LOGO MOBILE 420px ==================== */
+@media (max-width: 420px) {
+  .adj-circle-mask { width: 200px; height: 200px; }
+  .adj-footer input[type="range"] { width: 140px; }
+  .logo-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .logo-picker-box { padding: 16px; }
+}
+
+/* ==================== VOICE MOBILE 480px ==================== */
+@media (max-width: 480px) {
+  .voice-page { padding: 16px 12px; padding-bottom: 80px; }
+  .voice-fab { bottom: 80px; width: 58px; height: 58px; }
+  .voice-fab svg { width: 24px; height: 24px; }
+  .voice-rec-timer { font-size: 40px; }
+  .voice-preview-actions { flex-direction: column; }
+  .voice-preview-btn { padding: 14px 8px; }
+}

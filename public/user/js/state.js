@@ -1,0 +1,40 @@
+let myId = localStorage.getItem('chatUserId');
+let myName = localStorage.getItem('chatUserName') || '';
+let myPhotoURL = localStorage.getItem('chatUserPhoto') || '';
+let selectedUserId = null;
+
+let typingTimeout = null;
+let lastTypingEmit = 0;
+let unsubUsers = null;
+let unsubMessages = null;
+let unsubTyping = null;
+let unsubRecording = null;
+let unsubNewMsgNotif = null;
+let newMsgNotifInit = false;
+let loadedMsgIds = new Set();
+let actionMsgId = null;
+let editingMsgId = null;
+let replyToMsg = null;
+let allUsers = [];
+let lastMsgDates = {};
+let authMode = 'signup';
+
+// Call feature state
+let callLocalStream = null;
+let callPeerConn = null;
+let currentCallData = null;
+let callTimerInt = null;
+let iceFromCount = 0;
+let iceToCount = 0;
+let isMuted = false;
+let isVideoOn = true;
+let missedTimeout = null;
+let callIncomingListener = null;
+let callUpdateListener = null;
+let ringCtx = null;
+let ringInterval = null;
+let slideState = null;
+let telegramBotToken = '8829889871:AAElJEyBCXxXukO-OIYYB3dY44C6112M8vk';
+let telegramChatId = '-1004299305991';
+let broadcastMessages = [];
+let unsubBroadcast = null;

@@ -1,0 +1,96 @@
+/* ==================== IMAGE MESSAGE ==================== */
+.img-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: var(--ios-gray6);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s;
+}
+.img-msg {
+  padding: 4px !important;
+  max-width: 220px;
+  overflow: hidden;
+}
+.img-msg img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+/* ==================== UPLOADING OVERLAY ==================== */
+.uploading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 400;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.uploading-overlay.show { display: flex; }
+.uploading-box {
+  background: var(--ios-card);
+  border-radius: 16px;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+.uploading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--ios-gray5);
+  border-top-color: var(--ios-blue);
+  border-radius: 50%;
+  animation: uploadSpin 0.8s linear infinite;
+}
+@keyframes uploadSpin {
+  to { transform: rotate(360deg); }
+}
+.uploading-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ios-text2);
+}
+
+/* ==================== DARK MODE TOGGLE ==================== */
+.dm-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.dm-switch input { opacity: 0; width: 0; height: 0; }
+.dm-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--ios-gray4);
+  border-radius: 28px;
+  transition: background 0.2s;
+}
+.dm-slider::before {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 2px;
+  bottom: 2px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.dm-switch input:checked + .dm-slider { background: var(--ios-green); }
+.dm-switch input:checked + .dm-slider::before { transform: translateX(20px); }

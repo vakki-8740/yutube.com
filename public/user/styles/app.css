@@ -1,0 +1,246 @@
+.main-app {
+  display: none;
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+}
+
+.main-app.show {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-topbar {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--ios-separator);
+  padding: 12px 20px 12px;
+  padding-top: calc(12px + var(--safe-top));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.app-topbar .my-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.app-topbar .app-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  flex: 1;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+}
+
+.user-list-area {
+  width: 340px;
+  background: var(--ios-card);
+  border-right: 0.5px solid var(--ios-separator);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.user-list-header {
+  padding: 12px 20px;
+  border-bottom: 0.5px solid var(--ios-separator);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ios-gray);
+}
+
+.user-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.user-list-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 0.5px solid var(--ios-separator);
+  cursor: pointer;
+  transition: background 0.15s;
+  gap: 12px;
+}
+
+.user-item:hover {
+  background: var(--ios-gray6);
+}
+
+.user-item.active {
+  background: var(--ios-blue);
+}
+
+.user-item.active * {
+  color: white !important;
+}
+
+.user-item .u-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.user-item .u-online-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ios-green);
+  border: 2px solid white;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.user-item.active .u-online-dot {
+  border-color: var(--ios-blue);
+}
+
+.user-item .u-offline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ios-gray3);
+  border: 2px solid white;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.user-item.active .u-offline-dot {
+  border-color: var(--ios-blue);
+}
+
+.user-item .u-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-item .u-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.user-item .u-status {
+  font-size: 13px;
+  color: var(--ios-green);
+  margin-top: 1px;
+}
+
+.user-item.active .u-status {
+  color: rgba(255,255,255,0.8);
+}
+
+.no-users-msg {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ios-gray);
+}
+
+.no-users-msg .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.pages-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.pages-container .page {
+  display: none;
+  height: 100%;
+  width: 100%;
+}
+
+.pages-container .page.active {
+  display: flex;
+}
+
+.bottom-nav {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid var(--ios-separator);
+  display: flex;
+  flex-shrink: 0;
+  padding: 6px 0 calc(6px + var(--safe-bottom));
+  z-index: 100;
+}
+
+.bottom-nav .nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+  font-size: 11px;
+  color: var(--ios-gray);
+  cursor: pointer;
+  transition: color 0.15s;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav .nav-item .nav-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.bottom-nav .nav-item svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.bottom-nav .nav-item.active {
+  color: var(--ios-blue);
+}
+
+.bottom-nav .nav-item:active {
+  opacity: 0.6;
+}

@@ -1,0 +1,263 @@
+/* ==================== ACTION POPUP ==================== */
+.action-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-overlay.show {
+  display: flex;
+}
+
+.action-popup {
+  position: relative;
+  z-index: 301;
+  background: var(--ios-card);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  padding: 6px 0;
+  min-width: 150px;
+  display: none;
+  animation: popIn 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.action-popup.show {
+  display: block;
+}
+
+.action-popup .act-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--ios-text);
+  transition: background 0.1s;
+}
+
+.action-popup .act-btn:hover {
+  background: var(--ios-gray6);
+}
+
+.action-popup .act-btn:active {
+  background: var(--ios-gray5);
+}
+
+.action-popup .act-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.bottom-nav .nav-item svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.pii-icon svg {
+  display: block;
+  color: var(--ios-gray);
+}
+
+.profile-logout-btn svg {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.action-popup .act-btn.danger {
+  color: var(--ios-red);
+}
+
+.action-popup .act-sep {
+  height: 0.5px;
+  background: var(--ios-separator);
+  margin: 4px 0;
+}
+
+.react-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 12px;
+}
+
+.react-emoji {
+  font-size: 26px;
+  cursor: pointer;
+  transition: transform 0.15s;
+  padding: 2px;
+}
+
+.react-emoji:active {
+  transform: scale(1.35);
+}
+
+.msg-reactions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 2px 0;
+  margin-top: 2px;
+}
+
+.message-wrapper.own .msg-reactions {
+  justify-content: flex-end;
+}
+
+.msg-reaction {
+  font-size: 14px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 12px;
+  padding: 1px 6px 1px 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.4;
+}
+
+.message-wrapper.own .msg-reaction {
+  background: rgba(255,255,255,0.15);
+}
+
+.voice-msg { padding: 6px 12px !important; }
+.voice-msg-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.voice-msg-inner svg { flex-shrink: 0; }
+.voice-dur {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+.voice-msg-inner.playing svg { animation: voicePlay 0.6s infinite steps(1); }
+@keyframes voicePlay {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.broadcast-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 12px 0;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.bc-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ios-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.bc-sender {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ios-text2);
+  margin-bottom: 4px;
+}
+.bc-time {
+  font-size: 11px;
+  color: var(--ios-gray2);
+  margin-top: 2px;
+}
+.broadcast-msg .message-bubble { margin: 0; }
+.broadcast-msg .voice-msg-inner { justify-content: center; }
+
+.msg-reaction small {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ios-gray);
+}
+
+.message-wrapper.own .msg-reaction small {
+  color: rgba(255,255,255,0.7);
+}
+
+/* ==================== EDIT OVERLAY ==================== */
+.edit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 300;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.edit-overlay.show {
+  display: flex;
+}
+
+.edit-box {
+  background: var(--ios-card);
+  border-radius: 14px 14px 0 0;
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.edit-box .edit-label {
+  font-size: 14px;
+  color: var(--ios-gray);
+  margin-bottom: 8px;
+}
+
+.edit-box textarea {
+  width: 100%;
+  padding: 12px;
+  border: 0.5px solid var(--ios-separator);
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  min-height: 80px;
+  background: var(--ios-gray6);
+}
+
+.edit-box .edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.edit-box .edit-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-box .edit-cancel {
+  background: var(--ios-gray6);
+  color: var(--ios-text);
+}
+
+.edit-box .edit-save {
+  background: var(--ios-blue);
+  color: white;
+}
