@@ -26,7 +26,10 @@
 - **NEW Badge for Voice Recordings**: Badge based on play status (localStorage `listenedVoices`) — disappears after playing
 - **Mobile Layout Fixes**: `overflow: hidden` / `min-width: 0` on chat-view, chat-header, input-bar, messages-area, body
 - **Chat Message Loading Fix**: Reverted pagination attempt, back to original `orderBy('asc')` without limit
-- **File Split Complete**: Single 5520-line `index.html` split into 13 CSS files (`styles/`) and 16 JS files (`js/`). Index.html is now 545 lines with `<link>` and `<script>` references.
+- **File Split Complete → Merged Back**: Split into 13 CSS + 16 JS files, then merged back into single index.html (~5600 lines). All CSS in `<style>`, all JS in `<script>`.
+- **Voice Recordings Fix**: Added cache-busting (`?t=Date.now()`), `cache: 'no-store'`, debounce (300ms), safe error handling on `loadVoiceRecordings()`
+- **Voice Button Removed**: Removed voice-negative-btn from chat input bar (chat.css + mobile.css cleanup)
+- **Input Bar Cleanup**: Consolidated duplicate `.send-btn` rules, removed `overflow: hidden` from `.input-bar`
 
 ### In Progress
 - (none)
@@ -52,9 +55,7 @@
 - HTTP API base: `VOICE_API` variable points to backend
 
 ## Relevant Files
-- `public/user/index.html`: Main user chat app (now 545 lines, references external CSS/JS)
-- `public/user/styles/`: 13 CSS files — base, auth, app, chat, actions, call, profile, voice, misc, crop, toast, logo, mobile
-- `public/user/js/`: 16 JS files — firebase, state, auth, app, users, messages, actions, ui-helpers, tabs, profile, logo, call, webrtc, upload, voice, logout
+- `public/user/index.html`: Main user chat app (~5600 lines, all CSS + JS inline)
 - `public/admin/index.html`: Admin panel — untouched
 - `backend/server.js`: Express server with voices route mounted
 - `backend/routes/voices.js`: Voice recordings CRUD with SQLite
