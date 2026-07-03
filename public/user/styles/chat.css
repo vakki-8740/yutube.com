@@ -433,7 +433,6 @@
   align-items: flex-end;
   gap: 8px;
   flex-shrink: 0;
-  overflow: hidden;
   min-width: 0;
   width: 100%;
 }
@@ -443,50 +442,22 @@
   height: 36px;
   border-radius: 50%;
   border: none;
+  background: var(--ios-blue);
+  color: white;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: transform 0.15s;
-}
-
-.input-bar .send-btn:active {
-  transform: scale(0.88);
-}
-
-.input-bar .voice-negative-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border: 1.5px solid var(--ios-gray3);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--ios-gray);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  flex-shrink: 1;
-  min-width: 0;
-  transition: all 0.2s;
-  margin: 0 2px;
-  white-space: nowrap;
-  overflow: hidden;
-}
-.input-bar .voice-negative-btn:hover {
-  border-color: var(--ios-gray2);
-  color: var(--ios-text2);
-}
-
-.input-bar .send-btn {
-  background: var(--ios-blue);
-  color: white;
-  font-size: 16px;
   opacity: 0;
   transform: scale(0.5);
   pointer-events: none;
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.input-bar .send-btn:active {
+  transform: scale(0.88);
 }
 
 .input-bar .send-btn.show {

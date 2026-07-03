@@ -217,8 +217,6 @@
   .input-bar .img-btn { width: 34px; height: 34px; flex-shrink: 0; }
   .input-bar .img-btn svg { width: 18px; height: 18px; }
 
-  .input-bar .voice-negative-btn { padding: 5px 6px; font-size: 10px; flex-shrink: 1; min-width: 0; }
-
   .input-bar .send-btn {
     width: 32px;
     height: 32px;
