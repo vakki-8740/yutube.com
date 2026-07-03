@@ -2569,314 +2569,20 @@
       .logo-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
       .logo-picker-box { padding: 16px; }
     }
-    /* ==================== VOICE PACK ==================== */
-    .vp-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border: none;
-      background: transparent;
-      color: var(--ios-gray);
-      cursor: pointer;
-      flex-shrink: 0;
-      border-radius: 50%;
-      transition: background 0.2s, color 0.2s;
-    }
-    .vp-btn:hover { background: var(--ios-gray5); color: var(--ios-blue); }
-    .vp-btn:active { transform: scale(0.9); }
-
-    .vp-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 300;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-    .vp-overlay.show { display: flex; }
-
-    .vp-sheet {
-      background: var(--ios-card);
-      border-radius: 20px 20px 0 0;
-      width: 100%;
-      max-width: 420px;
-      max-height: 70vh;
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
-      padding-bottom: calc(16px + var(--safe-bottom));
-      animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-    .vp-sheet-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .vp-sheet-title {
-      font-size: 18px;
-      font-weight: 700;
-    }
-    .vp-sheet-close {
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: var(--ios-gray5);
-      border-radius: 50%;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--ios-gray);
-    }
-    .vp-list {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .vp-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: var(--ios-gray6);
-      border-radius: 12px;
-    }
-    .vp-play-btn {
+    /* ==================== IMAGE MESSAGE ==================== */
+    .img-btn {
       width: 40px;
       height: 40px;
       border: none;
-      background: var(--ios-blue);
+      background: var(--ios-gray6);
       border-radius: 50%;
-      color: white;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      transition: background 0.2s, transform 0.15s;
     }
-    .vp-play-btn:active { transform: scale(0.9); }
-    .vp-play-btn.playing { background: var(--ios-red); }
-    .vp-info {
-      flex: 1;
-      min-width: 0;
-    }
-    .vp-title {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .vp-meta {
-      font-size: 12px;
-      color: var(--ios-gray);
-    }
-    .vp-send-btn {
-      width: 36px;
-      height: 36px;
-      border: none;
-      background: var(--ios-green);
-      border-radius: 50%;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .vp-send-btn:active { transform: scale(0.9); }
-    .vp-record-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 18px;
-      background: var(--ios-blue);
-      color: white;
-      border: none;
-      border-radius: 14px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: transform 0.15s, background 0.2s;
-    }
-    .vp-record-btn:active { transform: scale(0.97); }
-    .vp-empty {
-      text-align: center;
-      padding: 30px 0;
-      color: var(--ios-gray);
-      font-size: 14px;
-    }
-
-    /* Recording UI */
-    .vp-rec-indicator {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ios-red);
-      margin-bottom: 8px;
-    }
-    .vp-rec-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--ios-red);
-      animation: vpPulse 0.8s infinite;
-    }
-    @keyframes vpPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
-    }
-    .vp-preview-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 20px 0;
-    }
-    .vp-preview-play {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: none;
-      background: var(--ios-blue);
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .vp-preview-play:active { transform: scale(0.9); }
-    .vp-preview-play.playing { background: var(--ios-red); }
-    .vp-preview-time {
-      font-size: 20px;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-    }
-    .vp-preview-label {
-      font-size: 12px;
-      color: var(--ios-gray);
-    }
-    .vp-send-rec-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 12px 24px;
-      border: none;
-      background: var(--ios-green);
-      color: white;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .vp-send-rec-btn:active { transform: scale(0.95); }
-
-    .vp-msg {
-      padding: 8px 12px !important;
-      min-width: 180px;
-      user-select: none;
-    }
-    .vp-msg-inner {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      cursor: pointer;
-    }
-    .vp-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .vp-play-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--ios-blue);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.2s;
-    }
-    .vp-play-icon svg { fill: white; flex-shrink: 0; }
-    .vp-play-icon.playing { background: var(--ios-red); }
-    .vp-time {
-      font-size: 12px;
-      color: var(--ios-gray);
-      font-variant-numeric: tabular-nums;
-    }
-    .vp-progress-wrap {
-      width: 100%;
-      height: 4px;
-      background: var(--ios-gray5);
-      border-radius: 2px;
-      overflow: hidden;
-      cursor: pointer;
-      position: relative;
-    }
-    .vp-progress-fill {
-      height: 100%;
-      background: var(--ios-blue);
-      border-radius: 2px;
-      width: 0%;
-      transition: width 0.1s linear;
-      pointer-events: none;
-    }
-    .vp-timer {
-      font-size: 24px;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      text-align: center;
-      padding: 8px 0;
-      color: var(--ios-red);
-    }
-    .vp-record-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    .vp-stop-btn {
-      width: 56px;
-      height: 56px;
-      border: none;
-      background: var(--ios-red);
-      border-radius: 50%;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .vp-stop-btn:active { transform: scale(0.9); }
-    .vp-cancel-btn {
-      padding: 10px 20px;
-      border: none;
-      background: var(--ios-gray5);
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--ios-gray);
-    }
-    /* ==================== IMAGE MESSAGE ==================== */
     .img-msg {
       padding: 4px !important;
       max-width: 220px;
@@ -2888,6 +2594,105 @@
       display: block;
       border-radius: 12px;
       cursor: pointer;
+    }
+
+    /* ==================== VOICE PAGE ==================== */
+    .voice-page {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+      overflow-y: auto;
+    }
+    .voice-recorder-card {
+      background: var(--ios-card);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .voice-recorder-idle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .voice-mic-ring {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid var(--ios-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.2s;
+      background: rgba(0, 122, 255, 0.08);
+    }
+    .voice-mic-ring:hover { background: rgba(0, 122, 255, 0.15); }
+    .voice-mic-ring:active { transform: scale(0.92); }
+    .voice-recorder-label { font-size: 16px; font-weight: 600; }
+    .voice-recorder-sub { font-size: 13px; color: var(--ios-gray); }
+
+    .voice-recorder-recording { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+    .voice-rec-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ios-red); animation: voicePulse 0.8s infinite; }
+    @keyframes voicePulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.3; transform:scale(0.7); } }
+    .voice-rec-timer { font-size: 36px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ios-red); }
+    .voice-rec-controls { display: flex; align-items: center; gap: 24px; }
+    .voice-cancel-btn { padding: 10px 20px; border: none; background: var(--ios-gray5); border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--ios-gray); }
+    .voice-stop-btn { width: 56px; height: 56px; border: none; background: var(--ios-red); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+    .voice-stop-btn:active { transform: scale(0.9); }
+
+    .voice-recorder-preview { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+    .voice-preview-row { display: flex; align-items: center; gap: 12px; }
+    .voice-preview-play { width: 48px; height: 48px; border-radius: 50%; border: none; background: var(--ios-blue); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .voice-preview-play:active { transform: scale(0.9); }
+    .voice-preview-play.playing { background: var(--ios-red); }
+    .voice-preview-dur { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .voice-preview-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .voice-preview-btn { display: flex; align-items: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s; }
+    .voice-preview-btn:active { transform: scale(0.95); }
+    .voice-preview-btn.delete { background: var(--ios-gray5); color: var(--ios-gray); }
+    .voice-preview-btn.record { background: var(--ios-gray5); color: var(--ios-blue); }
+    .voice-preview-btn.upload { background: var(--ios-green); color: white; }
+
+    .voice-upload-progress { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+    .voice-progress-bar { width: 100%; height: 4px; background: var(--ios-gray5); border-radius: 2px; overflow: hidden; }
+    .voice-progress-fill { height: 100%; background: var(--ios-blue); border-radius: 2px; width: 0%; transition: width 0.2s; }
+    .voice-progress-label { font-size: 12px; color: var(--ios-gray); text-align: center; }
+
+    .voice-list-header { font-size: 13px; font-weight: 600; color: var(--ios-gray); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; }
+    .voice-list { display: flex; flex-direction: column; gap: 10px; }
+    .voice-empty { text-align: center; padding: 40px 0; color: var(--ios-gray); font-size: 14px; }
+    .voice-card {
+      background: var(--ios-card);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .voice-card-header { display: flex; align-items: center; gap: 10px; }
+    .voice-card-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--ios-gray5); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--ios-gray); flex-shrink: 0; overflow: hidden; }
+    .voice-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .voice-card-info { flex: 1; min-width: 0; }
+    .voice-card-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .voice-card-time { font-size: 12px; color: var(--ios-gray); }
+    .voice-card-delete { width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: var(--ios-gray); display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; flex-shrink: 0; }
+    .voice-card-delete:hover { background: var(--ios-gray5); color: var(--ios-red); }
+    .voice-card-player { display: flex; align-items: center; gap: 10px; }
+    .voice-card-play { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--ios-blue); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+    .voice-card-play:active { transform: scale(0.9); }
+    .voice-card-play.playing { background: var(--ios-red); }
+    .voice-card-bar { flex: 1; height: 4px; background: var(--ios-gray5); border-radius: 2px; cursor: pointer; position: relative; overflow: hidden; }
+    .voice-card-bar-fill { height: 100%; background: var(--ios-blue); border-radius: 2px; width: 0%; transition: width 0.1s linear; pointer-events: none; }
+    .voice-card-dur { font-size: 12px; color: var(--ios-gray); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+    @media (max-width: 480px) {
+      .voice-preview-actions { flex-direction: column; width: 100%; }
+      .voice-preview-btn { justify-content: center; width: 100%; }
     }
 
     /* ==================== UPLOADING OVERLAY ==================== */
@@ -2959,25 +2764,6 @@
     }
     .dm-switch input:checked + .dm-slider { background: var(--ios-green); }
     .dm-switch input:checked + .dm-slider::before { transform: translateX(20px); }
-
-    .img-download-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border: none;
-      background: var(--ios-blue);
-      color: white;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .img-download-btn:active { opacity: 0.7; }
-    .img-download-btn.loading { opacity: 0.6; pointer-events: none; }
-    .img-download-btn.loading svg { animation: dlSpin 0.8s linear infinite; }
-    @keyframes dlSpin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -3079,17 +2865,21 @@
               </div>
 
               <div class="input-bar">
-                <button class="vp-btn" id="vpBtn" onclick="openVoicePackPicker()" title="Voice Pack">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-                  </svg>
-                </button>
-                <button class="vp-btn" id="imgBtn" onclick="document.getElementById('imgInput').click()" title="Send Image">
+                <button class="img-btn" id="imgBtn" onclick="document.getElementById('imgInput').click()" title="Send Image">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                   </svg>
                 </button>
                 <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="sendImage(this)">
+                <button class="voice-negative-btn" onclick="openVoiceRecorder()" title="Voice Recording">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                  VOICE
+                </button>
                 <div class="input-wrapper">
                   <textarea id="messageInput" rows="1" placeholder="Message" oninput="autoResize(this); handleTyping()"></textarea>
                 </div>
@@ -3188,6 +2978,67 @@
           </div>
         </div>
       </div>
+
+      <!-- Voice Page -->
+      <div class="page" id="voicePage">
+        <div class="voice-page">
+          <div class="voice-recorder-card" id="voiceRecorderCard">
+            <div class="voice-recorder-idle" id="voiceIdleUI">
+              <div class="voice-mic-ring" onclick="startVoiceRec()">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+              </div>
+              <div class="voice-recorder-label">Tap to Record</div>
+              <div class="voice-recorder-sub">Max 60 seconds</div>
+            </div>
+            <div class="voice-recorder-recording" id="voiceRecordingUI" style="display:none;">
+              <div class="voice-rec-dot"></div>
+              <div class="voice-rec-timer" id="voiceRecTimer">0:00</div>
+              <div class="voice-rec-controls">
+                <button class="voice-cancel-btn" onclick="cancelVoiceRec()">Cancel</button>
+                <button class="voice-stop-btn" onclick="stopVoiceRec()">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="voice-recorder-preview" id="voicePreviewUI" style="display:none;">
+              <audio id="voicePreviewAudio" style="display:none;"></audio>
+              <div class="voice-preview-row">
+                <button class="voice-preview-play" id="voicePreviewPlay" onclick="toggleVoicePreview()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <span class="voice-preview-dur" id="voicePreviewDur">0:00</span>
+              </div>
+              <div class="voice-preview-actions">
+                <button class="voice-preview-btn delete" onclick="deleteVoicePreview()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Delete
+                </button>
+                <button class="voice-preview-btn record" onclick="reRecordVoice()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+                  Record Again
+                </button>
+                <button class="voice-preview-btn upload" id="voiceUploadBtn" onclick="uploadVoiceRecording()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload
+                </button>
+              </div>
+              <div class="voice-upload-progress" id="voiceUploadProgress" style="display:none;">
+                <div class="voice-progress-bar"><div class="voice-progress-fill" id="voiceProgressFill"></div></div>
+                <div class="voice-progress-label" id="voiceProgressLabel">Uploading...</div>
+              </div>
+            </div>
+          </div>
+          <div class="voice-list-header">All Recordings</div>
+          <div class="voice-list" id="voiceList">
+            <div class="voice-empty" id="voiceEmpty">No recordings yet. Tap the mic to record your first voice.</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Bottom Nav -->
@@ -3204,6 +3055,15 @@
           <circle cx="12" cy="7" r="4"/>
         </svg>
         Profile
+      </button>
+      <button class="nav-item" id="navVoice" onclick="switchTab('voice')">
+        <svg class="nav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        Voice
       </button>
     </div>
   </div>
@@ -3339,56 +3199,7 @@
 
   <audio id="remoteAudio" autoplay playsinline style="display:none"></audio>
 
-  <!-- Voice Pack Picker -->
-  <div class="vp-overlay" id="vpOverlay" onclick="if(event.target===this)closeVoicePackPicker()">
-    <div class="vp-sheet">
-      <div class="vp-sheet-header">
-        <span class="vp-sheet-title">Voice Pack</span>
-        <button class="vp-sheet-close" onclick="closeVoicePackPicker()">✕</button>
-      </div>
 
-      <!-- Recording Area -->
-      <div id="vpRecordSection">
-        <div id="vpIdleUI">
-          <button class="vp-record-btn" id="vpRecordBtn" onclick="startVoiceRecording()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
-            Tap to Record
-          </button>
-        </div>
-        <div id="vpRecordingUI" style="display:none;">
-          <div class="vp-rec-indicator" id="vpRecIndicator">
-            <span class="vp-rec-dot"></span>
-            <span>Recording</span>
-          </div>
-          <div class="vp-timer" id="vpTimer">0:00</div>
-          <div class="vp-record-controls">
-            <button class="vp-cancel-btn" onclick="cancelVoiceRecording()">Cancel</button>
-            <button class="vp-stop-btn" id="vpStopBtn" onclick="stopVoiceRecording()">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-            </button>
-          </div>
-        </div>
-        <div id="vpPreviewUI" style="display:none;">
-          <div class="vp-preview-wrap">
-            <button class="vp-preview-play" id="vpPreviewPlay" onclick="previewRecording()">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <span class="vp-preview-time" id="vpPreviewTime">0:00</span>
-            <span class="vp-preview-label">Preview</span>
-          </div>
-          <div class="vp-record-controls">
-            <button class="vp-cancel-btn" onclick="discardRecording()">Discard</button>
-            <button class="vp-send-rec-btn" id="vpSendRecBtn" onclick="sendRecording()">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-              Send
-            </button>
-          </div>
-        </div>
-      </div>
-
-
-    </div>
-  </div>
 
   <!-- Uploading Overlay -->
   <div class="uploading-overlay" id="uploadingOverlay">
@@ -3401,13 +3212,7 @@
   <!-- Image Viewer Lightbox -->
   <div class="logo-picker-overlay" id="imgViewerOverlay" onclick="closeImgViewer()" style="background:rgba(0,0,0,0.85);">
     <div style="max-width:90%;max-height:90%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
-      <img id="imgViewerImg" src="" style="max-width:100%;max-height:80vh;border-radius:8px;">
-      <button class="img-download-btn" id="imgDownloadBtn" onclick="downloadViewerImage()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        <span id="imgDownloadLabel">Download</span>
-      </button>
+      <img id="imgViewerImg" src="" style="max-width:100%;max-height:80vh;border-radius:8px;" draggable="false" oncontextmenu="return false;">
     </div>
   </div>
 
@@ -3445,6 +3250,19 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
   <script>
+    document.addEventListener('contextmenu', function(e) {
+      if (e.target.closest('.img-msg, .voice-msg, .voice-card, .vp-msg, #imgViewerOverlay, #voicePreviewUI')) {
+        e.preventDefault();
+        return false;
+      }
+    });
+    document.addEventListener('dragstart', function(e) {
+      if (e.target.closest('img, audio')) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
     firebase.initializeApp({
       apiKey: "AIzaSyB2j604pnQWRzpu_yE0biwWktths5TxW38",
       authDomain: "own-chat-app-d5fd0.firebaseapp.com",
@@ -3901,13 +3719,7 @@
         }
         // Image
         if (msg.image) {
-          content += '<div class="message-bubble img-msg"><img src="' + msg.image.url + '" alt="" loading="lazy" onclick="openImgViewer(\'' + msg.image.url + '\')"></div>';
-        }
-        // Voice Pack
-        if (msg.voice_pack) {
-          const dur = msg.voice_pack.duration ? formatDuration(msg.voice_pack.duration) : '0:00';
-          const vpId = msg.id || 'vp_' + Date.now();
-          content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + msg.voice_pack.url + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner"><div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + dur + '</span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div></div></div>';
+          content += '<div class="message-bubble img-msg"><img src="' + msg.image.url + '" alt="" loading="lazy" draggable="false" oncontextmenu="return false;" onclick="openImgViewer(\'' + msg.image.url + '\')"></div>';
         }
         // Text
         if (msg.message) {
@@ -3968,12 +3780,7 @@
           content += '<div class="message-bubble voice-msg"><div class="voice-msg-inner" onclick="playVoiceMsg(this,\'' + msg.voice + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span class="voice-dur">' + dur + '</span></div></div>';
         }
         if (msg.image) {
-          content += '<div class="message-bubble img-msg"><img src="' + msg.image.url + '" alt="" loading="lazy" onclick="openImgViewer(\'' + msg.image.url + '\')"></div>';
-        }
-        if (msg.voice_pack) {
-          const dur = msg.voice_pack.duration ? formatDuration(msg.voice_pack.duration) : '0:00';
-          const vpId = msg.id || 'vp_' + Date.now();
-          content += '<div class="message-bubble vp-msg" data-vp-id="' + vpId + '" data-vp-url="' + msg.voice_pack.url + '" data-vp-dur="' + (msg.voice_pack.duration || 0) + '"><div class="vp-msg-inner"><div class="vp-row"><div class="vp-play-icon" onclick="playVpChatMsg(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span class="vp-time">0:00 / ' + dur + '</span></div><div class="vp-progress-wrap" onclick="seekVpChat(event, this)"><div class="vp-progress-fill"></div></div></div></div>';
+          content += '<div class="message-bubble img-msg"><img src="' + msg.image.url + '" alt="" loading="lazy" draggable="false" oncontextmenu="return false;" onclick="openImgViewer(\'' + msg.image.url + '\')"></div>';
         }
         if (msg.message) {
           content += '<div class="message-bubble">' + escapeHtml(msg.message) + '</div>';
@@ -4269,6 +4076,11 @@
         document.getElementById('navProfile').classList.add('active');
         document.getElementById('appTitle').textContent = 'Profile';
         loadProfile();
+      } else if (tab === 'voice') {
+        document.getElementById('voicePage').classList.add('active');
+        document.getElementById('navVoice').classList.add('active');
+        document.getElementById('appTitle').textContent = 'Voice';
+        loadVoiceRecordings();
       }
     }
 
@@ -4671,7 +4483,7 @@
       const user = allUsers.find(u => u.id === data.from);
       const name = user ? user.name : 'Unknown';
       const initial = (user ? user.name : 'U').charAt(0).toUpperCase();
-      const text = data.message || (data.voice ? 'Voice message' : (data.voice_pack ? 'Voice pack' : (data.image ? '🖼️ Image' : 'New message')));
+      const text = data.message || (data.voice ? 'Voice message' : (data.image ? '🖼️ Image' : 'New message'));
       const t = document.getElementById('toast');
       document.getElementById('toastAvatar').textContent = initial;
       document.getElementById('toastTitle').textContent = name;
@@ -5130,312 +4942,6 @@
       document.ontouchend = null;
     }
 
-    // ==================== VOICE PACK ====================
-    const VP_API = localStorage.getItem('vpApiUrl') || 'https://yutube-com-pcu9.onrender.com';
-    let voicePacks = [];
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let recordingStartTime = null;
-    let recordingTimer = null;
-    let lastRecordingBlob = null;
-    let lastRecordingDuration = 0;
-    let vpPreviewAudio = null;
-    let vpAudio = null;
-    let vpPlayingEl = null;
-
-    function openVoicePackPicker() {
-      if (!selectedUserId) return;
-      document.getElementById('vpOverlay').classList.add('show');
-    }
-
-    function closeVoicePackPicker() {
-      document.getElementById('vpOverlay').classList.remove('show');
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stream.getTracks().forEach(t => t.stop());
-        mediaRecorder = null;
-      }
-      if (recordingTimer) clearInterval(recordingTimer);
-      if (vpPreviewAudio) { vpPreviewAudio.pause(); vpPreviewAudio = null; }
-      recordedChunks = [];
-      lastRecordingBlob = null;
-      lastRecordingDuration = 0;
-      document.getElementById('vpRecordingUI').style.display = 'none';
-      document.getElementById('vpPreviewUI').style.display = 'none';
-      document.getElementById('vpIdleUI').style.display = 'block';
-      document.getElementById('vpPreviewPlay').classList.remove('playing');
-      document.getElementById('vpPreviewPlay').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-      const btn = document.getElementById('vpSendRecBtn');
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg> Send';
-    }
-
-    async function loadVoicePacks() {
-      const list = document.getElementById('vpList');
-      try {
-        const res = await fetch(VP_API + '/api/voice-packs/' + myId);
-        voicePacks = await res.json();
-        if (voicePacks.length === 0) {
-          list.innerHTML = '<div class="vp-empty">No voice packs yet. Tap "Record New" to create one.</div>';
-          return;
-        }
-        list.innerHTML = voicePacks.map((p, i) => `
-          <div class="vp-item">
-            <button class="vp-play-btn" id="vpPlay_${i}" onclick="playVpAudio(this, '${VP_API}${p.file_path}', ${i})">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <div class="vp-info">
-              <div class="vp-title">${escapeHtml(p.title || 'Voice Pack')}</div>
-              <div class="vp-meta">${formatDuration(p.duration)}</div>
-            </div>
-            <button class="vp-send-btn" onclick="sendVoicePack('${p.id}', '${VP_API}${p.file_path}', ${p.duration})">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
-          </div>
-        `).join('');
-      } catch (err) {
-        list.innerHTML = '<div class="vp-empty">Failed to load voice packs. Check server connection.</div>';
-      }
-    }
-
-    let vpChatAudio = null;
-    let vpChatInterval = null;
-    let vpChatIcon = null;
-    let vpChatTime = null;
-    let vpChatFill = null;
-    let vpChatWrapper = null;
-
-    function playVpChatMsg(iconEl) {
-      const wrapper = iconEl.closest('.vp-msg');
-      const url = wrapper.dataset.vpUrl;
-      const duration = parseFloat(wrapper.dataset.vpDur);
-      const timeEl = wrapper.querySelector('.vp-time');
-      const fillEl = wrapper.querySelector('.vp-progress-fill');
-
-      if (vpChatAudio && !vpChatAudio.paused && vpChatWrapper === wrapper) {
-        vpChatAudio.pause();
-        if (vpChatInterval) clearInterval(vpChatInterval);
-        iconEl.classList.remove('playing');
-        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        return;
-      }
-
-      if (vpChatAudio && vpChatAudio.paused && vpChatWrapper === wrapper) {
-        vpChatAudio.play();
-        iconEl.classList.add('playing');
-        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-        startVpProgress(wrapper, timeEl, fillEl, duration);
-        return;
-      }
-
-      if (vpChatAudio) {
-        vpChatAudio.pause();
-        if (vpChatInterval) clearInterval(vpChatInterval);
-        if (vpChatIcon) vpChatIcon.classList.remove('playing');
-        if (vpChatIcon) vpChatIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-      }
-
-      vpChatAudio = new Audio(url);
-      vpChatAudio.crossOrigin = 'anonymous';
-      vpChatWrapper = wrapper;
-      vpChatIcon = iconEl;
-      vpChatTime = timeEl;
-      vpChatFill = fillEl;
-
-      vpChatAudio.onended = () => {
-        iconEl.classList.remove('playing');
-        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        fillEl.style.width = '100%';
-        timeEl.textContent = formatDuration(duration) + ' / ' + formatDuration(duration);
-        if (vpChatInterval) clearInterval(vpChatInterval);
-        vpChatWrapper = null;
-      };
-
-      vpChatAudio.onerror = () => {
-        iconEl.classList.remove('playing');
-        iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        timeEl.textContent = 'Error / ' + formatDuration(duration);
-        if (vpChatInterval) clearInterval(vpChatInterval);
-        vpChatWrapper = null;
-        vpChatAudio = null;
-      };
-
-      vpChatAudio.play().catch(() => {});
-      iconEl.classList.add('playing');
-      iconEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-      startVpProgress(wrapper, timeEl, fillEl, duration);
-    }
-
-    function startVpProgress(wrapper, timeEl, fillEl, duration) {
-      if (vpChatInterval) clearInterval(vpChatInterval);
-      vpChatInterval = setInterval(() => {
-        if (vpChatAudio && !vpChatAudio.paused) {
-          const current = vpChatAudio.currentTime;
-          const pct = duration > 0 ? (current / duration) * 100 : 0;
-          fillEl.style.width = Math.min(pct, 100) + '%';
-          timeEl.textContent = formatDuration(current) + ' / ' + formatDuration(duration);
-        }
-      }, 200);
-    }
-
-    function seekVpChat(event, wrapEl) {
-      if (!vpChatAudio || vpChatWrapper !== wrapEl.closest('.vp-msg')) return;
-      const rect = wrapEl.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const pct = Math.max(0, Math.min(1, x / rect.width));
-      const duration = parseFloat(wrapEl.closest('.vp-msg').dataset.vpDur);
-      vpChatAudio.currentTime = pct * duration;
-    }
-
-    function playVpAudio(btn, url, idx) {
-      if (vpPlayingEl && vpPlayingEl !== btn) {
-        vpPlayingEl.classList.remove('playing');
-        vpPlayingEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        if (vpAudio) { vpAudio.pause(); vpAudio = null; }
-      }
-      if (vpPlayingEl === btn && vpAudio && !vpAudio.paused) {
-        vpAudio.pause();
-        btn.classList.remove('playing');
-        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        vpPlayingEl = null;
-        return;
-      }
-      if (vpAudio && vpPlayingEl === btn) {
-        vpAudio.currentTime = 0;
-        vpAudio.play();
-        btn.classList.add('playing');
-        return;
-      }
-      const audio = new Audio(url);
-      audio.onended = () => {
-        btn.classList.remove('playing');
-        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        vpPlayingEl = null;
-        vpAudio = null;
-      };
-      audio.play();
-      vpAudio = audio;
-      vpPlayingEl = btn;
-      btn.classList.add('playing');
-      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    }
-
-    async function sendVoicePack(packId, packUrl, duration) {
-      if (!selectedUserId) return;
-      const convId = [myId, selectedUserId].sort().join('_');
-      const msgData = {
-        conversation: convId, from: myId, to: selectedUserId,
-        created_at: firebase.firestore.FieldValue.serverTimestamp(),
-        edited: false, deleted: false,
-        voice_pack: { id: packId, url: packUrl, duration: duration }
-      };
-      if (replyToMsg) {
-        msgData.reply_to = { id: replyToMsg.id, message: replyToMsg.message || 'Image', from: replyToMsg.from };
-        cancelReply();
-      }
-      await db.collection('messages').add(msgData);
-      closeVoicePackPicker();
-      scrollToBottom();
-    }
-
-    async function startVoiceRecording() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        recordedChunks = [];
-        lastRecordingBlob = null;
-        const opts = { mimeType: 'audio/webm' };
-        try {
-          const sup = MediaRecorder.isTypeSupported('audio/webm;codecs=opus');
-          if (sup) opts.mimeType = 'audio/webm;codecs=opus';
-          opts.audioBitsPerSecond = 24000;
-        } catch(e) {}
-        mediaRecorder = new MediaRecorder(stream, opts);
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) recordedChunks.push(e.data);
-        };
-        mediaRecorder.onstop = () => {
-          stream.getTracks().forEach(t => t.stop());
-          lastRecordingDuration = Math.floor((Date.now() - recordingStartTime) / 1000);
-          lastRecordingBlob = new Blob(recordedChunks, { type: 'audio/webm' });
-          showPreviewUI();
-        };
-        mediaRecorder.start();
-        recordingStartTime = Date.now();
-        document.getElementById('vpIdleUI').style.display = 'none';
-        document.getElementById('vpRecordingUI').style.display = 'block';
-        startRecTimer();
-      } catch (err) {
-        alert('Microphone access is required to record voice packs.');
-      }
-    }
-
-    function startRecTimer() {
-      const el = document.getElementById('vpTimer');
-      if (recordingTimer) clearInterval(recordingTimer);
-      recordingTimer = setInterval(() => {
-        const sec = Math.floor((Date.now() - recordingStartTime) / 1000);
-        if (sec >= 300) stopVoiceRecording();
-        el.textContent = formatDuration(sec);
-      }, 200);
-    }
-
-    function stopVoiceRecording() {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-        if (recordingTimer) clearInterval(recordingTimer);
-        document.getElementById('vpRecordingUI').style.display = 'none';
-      }
-    }
-
-    function cancelVoiceRecording() {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stream.getTracks().forEach(t => t.stop());
-        mediaRecorder = null;
-      }
-      if (recordingTimer) clearInterval(recordingTimer);
-      recordedChunks = [];
-      lastRecordingBlob = null;
-      document.getElementById('vpRecordingUI').style.display = 'none';
-      document.getElementById('vpIdleUI').style.display = 'block';
-    }
-
-    function showPreviewUI() {
-      document.getElementById('vpPreviewUI').style.display = 'block';
-      document.getElementById('vpPreviewTime').textContent = formatDuration(lastRecordingDuration);
-    }
-
-    function discardRecording() {
-      if (vpPreviewAudio) { vpPreviewAudio.pause(); vpPreviewAudio = null; }
-      lastRecordingBlob = null;
-      lastRecordingDuration = 0;
-      recordedChunks = [];
-      document.getElementById('vpPreviewUI').style.display = 'none';
-      document.getElementById('vpIdleUI').style.display = 'block';
-      document.getElementById('vpPreviewPlay').classList.remove('playing');
-      document.getElementById('vpPreviewPlay').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-    }
-
-    function previewRecording() {
-      if (!lastRecordingBlob) return;
-      const btn = document.getElementById('vpPreviewPlay');
-      if (vpPreviewAudio && !vpPreviewAudio.paused) {
-        vpPreviewAudio.pause();
-        btn.classList.remove('playing');
-        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        return;
-      }
-      if (!vpPreviewAudio) {
-        const url = URL.createObjectURL(lastRecordingBlob);
-        vpPreviewAudio = new Audio(url);
-        vpPreviewAudio.onended = () => {
-          btn.classList.remove('playing');
-          btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-          vpPreviewAudio = null;
-        };
-      }
-      vpPreviewAudio.play();
-      btn.classList.add('playing');
-      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    }
 
     function showUploading(label) {
       document.getElementById('uploadingLabel').textContent = label || 'Uploading...';
@@ -5448,33 +4954,6 @@
     function openImgViewer(url) {
       document.getElementById('imgViewerImg').src = url;
       document.getElementById('imgViewerOverlay').style.display = 'flex';
-      document.getElementById('imgDownloadBtn').classList.remove('loading');
-      document.getElementById('imgDownloadLabel').textContent = 'Download';
-    }
-    async function downloadViewerImage() {
-      const url = document.getElementById('imgViewerImg').src;
-      if (!url) return;
-      const btn = document.getElementById('imgDownloadBtn');
-      const label = document.getElementById('imgDownloadLabel');
-      btn.classList.add('loading');
-      label.textContent = 'Downloading...';
-      try {
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'image_' + Date.now() + '.' + (blob.type.split('/')[1] || 'jpg');
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-        label.textContent = 'Downloaded';
-        setTimeout(() => { btn.classList.remove('loading'); label.textContent = 'Download'; }, 2000);
-      } catch (err) {
-        label.textContent = 'Failed';
-        btn.classList.remove('loading');
-        setTimeout(() => { label.textContent = 'Download'; }, 2000);
-      }
     }
     function closeImgViewer() {
       document.getElementById('imgViewerOverlay').style.display = 'none';
@@ -5488,14 +4967,15 @@
       try {
         const formData = new FormData();
         formData.append('image', file);
-        const res = await fetch(VP_API + '/api/voice-packs/upload-image', { method: 'POST', body: formData });
+        const SERVER_URL = 'https://yutube-com-pcu9.onrender.com';
+        const res = await fetch(SERVER_URL + '/api/voice-packs/upload-image', { method: 'POST', body: formData });
         const data = await res.json();
         const convId = [myId, selectedUserId].sort().join('_');
         const msgData = {
           conversation: convId, from: myId, to: selectedUserId,
           created_at: firebase.firestore.FieldValue.serverTimestamp(),
           edited: false, deleted: false,
-          image: { url: VP_API + data.url }
+          image: { url: SERVER_URL + data.url }
         };
         if (replyToMsg) {
           msgData.reply_to = { id: replyToMsg.id, message: replyToMsg.message || 'Image', from: replyToMsg.from };
@@ -5515,47 +4995,312 @@
       input.value = '';
     }
 
-    async function sendRecording() {
-      if (!lastRecordingBlob || !selectedUserId) return;
-      if (vpPreviewAudio) { vpPreviewAudio.pause(); vpPreviewAudio = null; }
-      showUploading('Uploading voice pack...');
-      document.getElementById('vpSendRecBtn').disabled = true;
-      document.getElementById('vpSendRecBtn').textContent = 'Sending...';
-      try {
-        const formData = new FormData();
-        formData.append('audio', lastRecordingBlob, 'recording.webm');
-        formData.append('userId', myId);
-        formData.append('duration', lastRecordingDuration);
-        formData.append('title', 'Voice ' + new Date().toLocaleTimeString());
-        const res = await fetch(VP_API + '/api/voice-packs/upload', { method: 'POST', body: formData });
-        const data = await res.json();
-        const convId = [myId, selectedUserId].sort().join('_');
-        const msgData = {
-          conversation: convId, from: myId, to: selectedUserId,
-          created_at: firebase.firestore.FieldValue.serverTimestamp(),
-          edited: false, deleted: false,
-          voice_pack: { id: data.id, url: VP_API + data.url, duration: data.duration }
+    // ==================== VOICE RECORDING PAGE ====================
+    const VOICE_API = 'https://yutube-com-pcu9.onrender.com';
+    let voiceRecMediaRecorder = null;
+    let voiceRecChunks = [];
+    let voiceRecStartTime = null;
+    let voiceRecTimer = null;
+    let voiceRecBlob = null;
+    let voiceRecDuration = 0;
+    let voiceRecPreviewAudio = null;
+    let voiceRecPlaying = false;
+    let voiceCardAudio = null;
+    let voiceCardInterval = null;
+    let voiceCardPlayEl = null;
+
+    function openVoiceRecorder() {
+      switchTab('voice');
+    }
+
+    function startVoiceRec() {
+      if (!myId) return;
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        voiceRecChunks = [];
+        voiceRecBlob = null;
+        voiceRecDuration = 0;
+        const opts = { mimeType: 'audio/webm' };
+        try {
+          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) opts.mimeType = 'audio/webm;codecs=opus';
+          opts.audioBitsPerSecond = 24000;
+        } catch(e) {}
+        voiceRecMediaRecorder = new MediaRecorder(stream, opts);
+        voiceRecMediaRecorder.ondataavailable = e => { if (e.data.size > 0) voiceRecChunks.push(e.data); };
+        voiceRecMediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          voiceRecDuration = Math.floor((Date.now() - voiceRecStartTime) / 1000);
+          voiceRecBlob = new Blob(voiceRecChunks, { type: 'audio/webm' });
+          showVoicePreview();
         };
-        if (replyToMsg) {
-          msgData.reply_to = { id: replyToMsg.id, message: replyToMsg.message || 'Image', from: replyToMsg.from };
-          cancelReply();
-        }
-        await db.collection('messages').add(msgData);
-        hideUploading();
-        if (typeof sendTelegramAlert === 'function') {
-          const toUser = allUsers.find(u => u.id === selectedUserId);
-          const toName = toUser ? toUser.name : 'Admin';
-          sendTelegramAlert(myName, '🎤 Voice pack (' + formatDuration(lastRecordingDuration) + ')', new Date().toLocaleString('en-IN'), toName);
-        }
-        closeVoicePackPicker();
-        scrollToBottom();
-      } catch (err) {
-        hideUploading();
-        alert('Failed to send voice pack. Check server connection.');
-        document.getElementById('vpSendRecBtn').disabled = false;
-        document.getElementById('vpSendRecBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg> Send';
+        voiceRecMediaRecorder.start();
+        voiceRecStartTime = Date.now();
+        document.getElementById('voiceIdleUI').style.display = 'none';
+        document.getElementById('voicePreviewUI').style.display = 'none';
+        document.getElementById('voiceRecordingUI').style.display = 'flex';
+        startVoiceRecTimer();
+      }).catch(() => {
+        alert('Microphone access is required.');
+      });
+    }
+
+    function startVoiceRecTimer() {
+      const el = document.getElementById('voiceRecTimer');
+      if (voiceRecTimer) clearInterval(voiceRecTimer);
+      voiceRecTimer = setInterval(() => {
+        const sec = Math.floor((Date.now() - voiceRecStartTime) / 1000);
+        if (sec >= 60) stopVoiceRec();
+        el.textContent = formatDuration(sec);
+      }, 200);
+    }
+
+    function stopVoiceRec() {
+      if (voiceRecMediaRecorder && voiceRecMediaRecorder.state === 'recording') {
+        voiceRecMediaRecorder.stop();
+        if (voiceRecTimer) clearInterval(voiceRecTimer);
+        document.getElementById('voiceRecordingUI').style.display = 'none';
       }
     }
+
+    function cancelVoiceRec() {
+      if (voiceRecMediaRecorder && voiceRecMediaRecorder.state === 'recording') {
+        voiceRecMediaRecorder.stream.getTracks().forEach(t => t.stop());
+        voiceRecMediaRecorder = null;
+      }
+      if (voiceRecTimer) clearInterval(voiceRecTimer);
+      voiceRecChunks = [];
+      voiceRecBlob = null;
+      document.getElementById('voiceRecordingUI').style.display = 'none';
+      document.getElementById('voiceIdleUI').style.display = 'flex';
+    }
+
+    function showVoicePreview() {
+      document.getElementById('voicePreviewUI').style.display = 'flex';
+      document.getElementById('voiceIdleUI').style.display = 'none';
+      document.getElementById('voiceRecordingUI').style.display = 'none';
+      document.getElementById('voicePreviewDur').textContent = formatDuration(voiceRecDuration);
+      document.getElementById('voiceUploadProgress').style.display = 'none';
+      document.getElementById('voiceUploadBtn').disabled = false;
+    }
+
+    function toggleVoicePreview() {
+      const audio = document.getElementById('voicePreviewAudio');
+      const btn = document.getElementById('voicePreviewPlay');
+      if (!voiceRecBlob) return;
+      if (voiceRecPreviewAudio && !voiceRecPreviewAudio.paused) {
+        voiceRecPreviewAudio.pause();
+        btn.classList.remove('playing');
+        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
+        return;
+      }
+      if (!voiceRecPreviewAudio) {
+        voiceRecPreviewAudio = new Audio(URL.createObjectURL(voiceRecBlob));
+        voiceRecPreviewAudio.onended = () => {
+          btn.classList.remove('playing');
+          btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
+          voiceRecPreviewAudio = null;
+        };
+      }
+      voiceRecPreviewAudio.play();
+      btn.classList.add('playing');
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    }
+
+    function deleteVoicePreview() {
+      if (voiceRecPreviewAudio) { voiceRecPreviewAudio.pause(); voiceRecPreviewAudio = null; }
+      voiceRecBlob = null;
+      voiceRecDuration = 0;
+      voiceRecChunks = [];
+      document.getElementById('voicePreviewUI').style.display = 'none';
+      document.getElementById('voiceIdleUI').style.display = 'flex';
+      document.getElementById('voicePreviewPlay').classList.remove('playing');
+    }
+
+    function reRecordVoice() {
+      deleteVoicePreview();
+      startVoiceRec();
+    }
+
+    function uploadVoiceRecording() {
+      if (!voiceRecBlob || !myId) return;
+      if (voiceRecPreviewAudio) { voiceRecPreviewAudio.pause(); voiceRecPreviewAudio = null; }
+      const progress = document.getElementById('voiceUploadProgress');
+      const fill = document.getElementById('voiceProgressFill');
+      const label = document.getElementById('voiceProgressLabel');
+      const btn = document.getElementById('voiceUploadBtn');
+      progress.style.display = 'flex';
+      btn.disabled = true;
+      fill.style.width = '0%';
+      label.textContent = 'Uploading...';
+
+      const formData = new FormData();
+      formData.append('audio', voiceRecBlob, 'recording.webm');
+      formData.append('userId', myId);
+      formData.append('duration', voiceRecDuration);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', VOICE_API + '/api/voices/upload');
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          fill.style.width = pct + '%';
+          label.textContent = 'Uploading... ' + pct + '%';
+        }
+      };
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          label.textContent = 'Upload complete!';
+          fill.style.width = '100%';
+          voiceRecBlob = null;
+          voiceRecChunks = [];
+          voiceRecDuration = 0;
+          setTimeout(() => {
+            document.getElementById('voicePreviewUI').style.display = 'none';
+            document.getElementById('voiceIdleUI').style.display = 'flex';
+            loadVoiceRecordings();
+          }, 800);
+        } else {
+          label.textContent = 'Upload failed. Try again.';
+          btn.disabled = false;
+        }
+      };
+      xhr.onerror = () => {
+        label.textContent = 'Network error. Try again.';
+        btn.disabled = false;
+      };
+      xhr.send(formData);
+    }
+
+    async function loadVoiceRecordings() {
+      const list = document.getElementById('voiceList');
+      const empty = document.getElementById('voiceEmpty');
+      try {
+        const res = await fetch(VOICE_API + '/api/voices/list');
+        const recordings = await res.json();
+        if (recordings.length === 0) {
+          list.innerHTML = '';
+          list.appendChild(empty);
+          empty.style.display = 'block';
+          return;
+        }
+        empty.style.display = 'none';
+        list.innerHTML = recordings.map(r => {
+          const user = (typeof allUsers !== 'undefined' && allUsers.find) ? allUsers.find(u => u.id === r.user_id) : null;
+          const name = user ? user.name : 'User';
+          const initial = name.charAt(0).toUpperCase();
+          const avatar = (user && user.photoURL) ? '<img src="' + user.photoURL + '">' : initial;
+          const isOwner = r.user_id === myId;
+          const timeAgo = r.created_at ? getTimeAgo(new Date(r.created_at + 'Z')) : '';
+          return '<div class="voice-card" data-id="' + r.id + '">' +
+            '<div class="voice-card-header">' +
+              '<div class="voice-card-avatar">' + avatar + '</div>' +
+              '<div class="voice-card-info">' +
+                '<div class="voice-card-name">' + escapeHtml(name) + '</div>' +
+                '<div class="voice-card-time">' + timeAgo + '</div>' +
+              '</div>' +
+              (isOwner ? '<button class="voice-card-delete" onclick="deleteVoiceRecording(\'' + r.id + '\')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' : '') +
+            '</div>' +
+            '<div class="voice-card-player">' +
+              '<button class="voice-card-play" onclick="playVoiceCard(this, \'' + VOICE_API + r.file_path + '\')">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>' +
+              '</button>' +
+              '<div class="voice-card-bar" onclick="seekVoiceCard(event, this)" data-dur="' + (r.duration || 0) + '">' +
+                '<div class="voice-card-bar-fill"></div>' +
+              '</div>' +
+              '<span class="voice-card-dur">' + formatDuration(r.duration || 0) + '</span>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      } catch (err) {
+        list.innerHTML = '<div class="voice-empty">Failed to load recordings.</div>';
+      }
+    }
+
+    function playVoiceCard(btn, url) {
+      const card = btn.closest('.voice-card');
+      const bar = card.querySelector('.voice-card-bar');
+      const fill = card.querySelector('.voice-card-bar-fill');
+      const dur = parseFloat(bar.dataset.dur) || 0;
+      if (voiceCardAudio && voiceCardPlayEl === btn && !voiceCardAudio.paused) {
+        voiceCardAudio.pause();
+        btn.classList.remove('playing');
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
+        if (voiceCardInterval) clearInterval(voiceCardInterval);
+        return;
+      }
+      if (voiceCardAudio && voiceCardPlayEl === btn && voiceCardAudio.paused) {
+        voiceCardAudio.play();
+        btn.classList.add('playing');
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+        startVoiceCardProgress(bar, fill, dur);
+        return;
+      }
+      if (voiceCardAudio) {
+        voiceCardAudio.pause();
+        if (voiceCardInterval) clearInterval(voiceCardInterval);
+        if (voiceCardPlayEl) {
+          voiceCardPlayEl.classList.remove('playing');
+          voiceCardPlayEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
+        }
+        const prevFill = voiceCardPlayEl ? voiceCardPlayEl.closest('.voice-card').querySelector('.voice-card-bar-fill') : null;
+        if (prevFill) prevFill.style.width = '0%';
+      }
+      voiceCardAudio = new Audio(url);
+      voiceCardPlayEl = btn;
+      voiceCardAudio.onended = () => {
+        btn.classList.remove('playing');
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
+        fill.style.width = '0%';
+        if (voiceCardInterval) clearInterval(voiceCardInterval);
+        voiceCardAudio = null;
+        voiceCardPlayEl = null;
+      };
+      voiceCardAudio.play();
+      btn.classList.add('playing');
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+      startVoiceCardProgress(bar, fill, dur);
+    }
+
+    function startVoiceCardProgress(bar, fill, dur) {
+      if (voiceCardInterval) clearInterval(voiceCardInterval);
+      voiceCardInterval = setInterval(() => {
+        if (voiceCardAudio && !voiceCardAudio.paused) {
+          const pct = dur > 0 ? (voiceCardAudio.currentTime / dur) * 100 : 0;
+          fill.style.width = Math.min(pct, 100) + '%';
+        }
+      }, 150);
+    }
+
+    function seekVoiceCard(event, bar) {
+      if (!voiceCardAudio || voiceCardPlayEl.closest('.voice-card').querySelector('.voice-card-bar') !== bar) return;
+      const rect = bar.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, x / rect.width));
+      const dur = parseFloat(bar.dataset.dur) || 0;
+      voiceCardAudio.currentTime = pct * dur;
+    }
+
+    async function deleteVoiceRecording(id) {
+      if (!confirm('Delete this recording?')) return;
+      try {
+        await fetch(VOICE_API + '/api/voices/' + id, { method: 'DELETE' });
+        loadVoiceRecordings();
+      } catch (err) {
+        alert('Failed to delete.');
+      }
+    }
+
+    function getTimeAgo(date) {
+      const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (seconds < 60) return 'Just now';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return minutes + 'm ago';
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return hours + 'h ago';
+      const days = Math.floor(hours / 24);
+      if (days < 7) return days + 'd ago';
+      return date.toLocaleDateString();
+    }
+
 
   </script>
 </body>
