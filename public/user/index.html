@@ -2646,10 +2646,10 @@
       background: var(--ios-card);
       border-radius: 20px 20px 0 0;
       padding: 8px 20px calc(16px + env(safe-area-inset-bottom, 0px));
-      z-index: 100;
+      z-index: 200;
       box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
       animation: sheetSlideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      max-height: 85vh;
+      max-height: 75vh;
       overflow-y: auto;
     }
     .voice-sheet-handle { width: 36px; height: 4px; background: var(--ios-gray4); border-radius: 2px; margin: 0 auto 12px; flex-shrink: 0; }
@@ -5068,6 +5068,15 @@
     let voiceCardInterval = null;
     let voiceCardPlayEl = null;
 
+    function showVoiceSheet(id) {
+      document.getElementById(id).style.display = 'block';
+      document.querySelector('.bottom-nav').style.display = 'none';
+    }
+    function hideVoiceSheet(id) {
+      document.getElementById(id).style.display = 'none';
+      document.querySelector('.bottom-nav').style.display = 'flex';
+    }
+
     function openVoiceRecorder() {
       switchTab('voice');
     }
@@ -5093,8 +5102,8 @@
         };
         voiceRecMediaRecorder.start();
         voiceRecStartTime = Date.now();
-        document.getElementById('voicePreviewUI').style.display = 'none';
-        document.getElementById('voiceRecordingUI').style.display = 'block';
+        hideVoiceSheet('voicePreviewUI');
+        showVoiceSheet('voiceRecordingUI');
         document.getElementById('voiceFabBtn').style.display = 'none';
         startVoiceRecTimer();
       }).catch(() => {
@@ -5116,7 +5125,7 @@
       if (voiceRecMediaRecorder && voiceRecMediaRecorder.state === 'recording') {
         voiceRecMediaRecorder.stop();
         if (voiceRecTimer) clearInterval(voiceRecTimer);
-        document.getElementById('voiceRecordingUI').style.display = 'none';
+        hideVoiceSheet('voiceRecordingUI');
       }
     }
 
@@ -5128,13 +5137,13 @@
       if (voiceRecTimer) clearInterval(voiceRecTimer);
       voiceRecChunks = [];
       voiceRecBlob = null;
-      document.getElementById('voiceRecordingUI').style.display = 'none';
+      hideVoiceSheet('voiceRecordingUI');
       document.getElementById('voiceFabBtn').style.display = 'flex';
     }
 
     function showVoicePreview() {
-      document.getElementById('voicePreviewUI').style.display = 'block';
-      document.getElementById('voiceRecordingUI').style.display = 'none';
+      showVoiceSheet('voicePreviewUI');
+      hideVoiceSheet('voiceRecordingUI');
       document.getElementById('voiceFabBtn').style.display = 'none';
       document.getElementById('voicePreviewDur').textContent = formatDuration(voiceRecDuration);
       document.getElementById('voiceUploadProgress').style.display = 'none';
@@ -5169,7 +5178,7 @@
       voiceRecBlob = null;
       voiceRecDuration = 0;
       voiceRecChunks = [];
-      document.getElementById('voicePreviewUI').style.display = 'none';
+      hideVoiceSheet('voicePreviewUI');
       document.getElementById('voiceFabBtn').style.display = 'flex';
       document.getElementById('voicePreviewPlay').classList.remove('playing');
     }
@@ -5213,7 +5222,7 @@
           voiceRecChunks = [];
           voiceRecDuration = 0;
           setTimeout(() => {
-            document.getElementById('voicePreviewUI').style.display = 'none';
+            hideVoiceSheet('voicePreviewUI');
             document.getElementById('voiceFabBtn').style.display = 'flex';
             loadVoiceRecordings();
           }, 800);
