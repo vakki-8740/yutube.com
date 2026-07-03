@@ -722,6 +722,36 @@
       30% { transform: translateY(-4px); }
     }
 
+    .recording-indicator {
+      display: none;
+      padding: 10px 14px;
+      background: rgba(255,59,48,0.1);
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      margin-bottom: 8px;
+      width: fit-content;
+      align-items: center;
+      gap: 6px;
+    }
+    .recording-indicator.show {
+      display: inline-flex;
+    }
+    .recording-indicator .rec-mic-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--ios-red);
+      animation: recPulse 1s ease-in-out infinite;
+    }
+    @keyframes recPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .recording-indicator .rec-text {
+      font-size: 13px;
+      color: var(--ios-red);
+      font-weight: 500;
+    }
+
     /* ==================== REPLY PREVIEW BAR ==================== */
     .reply-preview-bar {
       display: none;
@@ -2889,6 +2919,15 @@
                   <div class="dot"></div>
                   <div class="dot"></div>
                 </div>
+                <div class="recording-indicator" id="recordingIndicator">
+                  <svg class="rec-mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                  <span class="rec-text">Recording...</span>
+                </div>
               </div>
 
               <div class="reply-preview-bar" id="replyPreviewBar">
@@ -3346,6 +3385,7 @@
     let unsubUsers = null;
     let unsubMessages = null;
     let unsubTyping = null;
+    let unsubRecording = null;
     let unsubNewMsgNotif = null;
     let newMsgNotifInit = false;
     let loadedMsgIds = new Set();
@@ -3513,6 +3553,7 @@
       if (unsubUsers) unsubUsers();
       if (unsubMessages) unsubMessages();
       if (unsubTyping) unsubTyping();
+      if (unsubRecording) unsubRecording();
     }
 
     document.getElementById('nameInput').addEventListener('keydown', (e) => {
@@ -3641,6 +3682,7 @@
     function selectUser(userId) {
       if (unsubMessages) { unsubMessages(); unsubMessages = null; }
       if (unsubTyping) { unsubTyping(); unsubTyping = null; }
+      if (unsubRecording) { unsubRecording(); unsubRecording = null; }
       loadedMsgIds.clear();
 
       selectedUserId = userId;
@@ -3676,6 +3718,7 @@
 
       listenMessages();
       listenTyping();
+      listenRecording();
       renderBroadcastMessages();
     }
 
@@ -3686,6 +3729,7 @@
       document.getElementById('chatView').classList.remove('show');
       if (unsubMessages) { unsubMessages(); unsubMessages = null; }
       if (unsubTyping) { unsubTyping(); unsubTyping = null; }
+      if (unsubRecording) { unsubRecording(); unsubRecording = null; }
       cancelReply();
     }
 
@@ -4042,6 +4086,35 @@
       });
     }
 
+    // ==================== RECORDING INDICATOR ====================
+    function listenRecording() {
+      if (!selectedUserId) return;
+      if (unsubRecording) unsubRecording();
+
+      const convId = [myId, selectedUserId].sort().join('_');
+
+      unsubRecording = db.collection('recording').doc(convId).onSnapshot((doc) => {
+        const el = document.getElementById('recordingIndicator');
+        if (doc.exists && doc.data()[selectedUserId]) {
+          el.classList.add('show');
+          document.getElementById('typingIndicator').classList.remove('show');
+          scrollToBottom();
+        } else {
+          el.classList.remove('show');
+        }
+      });
+    }
+
+    function setRecordingStatus(isRecording) {
+      if (!selectedUserId) return;
+      const convId = [myId, selectedUserId].sort().join('_');
+      if (isRecording) {
+        db.collection('recording').doc(convId).set({ [myId]: true }, { merge: true });
+      } else {
+        db.collection('recording').doc(convId).set({ [myId]: false }, { merge: true });
+      }
+    }
+
     function handleTyping() {
       if (!selectedUserId) return;
       const convId = [myId, selectedUserId].sort().join('_');
@@ -4371,6 +4444,7 @@
       if (unsubUsers) unsubUsers();
       if (unsubMessages) unsubMessages();
       if (unsubTyping) unsubTyping();
+      if (unsubRecording) unsubRecording();
 
       db.collection('users').doc(myId).update({ is_online: false, last_seen: firebase.firestore.FieldValue.serverTimestamp() });
 
@@ -5098,10 +5172,12 @@
           stream.getTracks().forEach(t => t.stop());
           voiceRecDuration = Math.floor((Date.now() - voiceRecStartTime) / 1000);
           voiceRecBlob = new Blob(voiceRecChunks, { type: 'audio/webm' });
+          setRecordingStatus(false);
           showVoicePreview();
         };
         voiceRecMediaRecorder.start();
         voiceRecStartTime = Date.now();
+        setRecordingStatus(true);
         hideVoiceSheet('voicePreviewUI');
         showVoiceSheet('voiceRecordingUI');
         document.getElementById('voiceFabBtn').style.display = 'none';
@@ -5137,6 +5213,7 @@
       if (voiceRecTimer) clearInterval(voiceRecTimer);
       voiceRecChunks = [];
       voiceRecBlob = null;
+      setRecordingStatus(false);
       hideVoiceSheet('voiceRecordingUI');
       document.getElementById('voiceFabBtn').style.display = 'flex';
     }
