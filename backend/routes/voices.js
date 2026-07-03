@@ -9,33 +9,44 @@ const router = express.Router();
 
 const DB_PATH = path.join(__dirname, '..', 'voices.db');
 let db = null;
+let dbReady = null;
 
 async function getDb() {
   if (db) return db;
-  const SQL = await initSqlJs();
-  if (fs.existsSync(DB_PATH)) {
-    const buf = fs.readFileSync(DB_PATH);
-    db = new SQL.Database(buf);
-  } else {
-    db = new SQL.Database();
-  }
-  db.run(`CREATE TABLE IF NOT EXISTS voice_recordings (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    file_path TEXT NOT NULL,
-    duration INTEGER DEFAULT 0,
-    file_size INTEGER DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now'))
-  )`);
-  saveDb();
-  return db;
+  if (dbReady) return dbReady;
+
+  dbReady = (async () => {
+    const SQL = await initSqlJs();
+    if (fs.existsSync(DB_PATH)) {
+      const buf = fs.readFileSync(DB_PATH);
+      db = new SQL.Database(buf);
+    } else {
+      db = new SQL.Database();
+    }
+    db.run(`CREATE TABLE IF NOT EXISTS voice_recordings (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      duration INTEGER DEFAULT 0,
+      file_size INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`);
+    persistDb();
+    return db;
+  })();
+
+  return dbReady;
 }
 
-function saveDb() {
+function persistDb() {
   if (!db) return;
-  const data = db.export();
-  const buffer = Buffer.from(data);
-  fs.writeFileSync(DB_PATH, buffer);
+  try {
+    const data = db.export();
+    const buffer = Buffer.from(data);
+    fs.writeFileSync(DB_PATH, buffer);
+  } catch (err) {
+    console.error('Failed to persist DB:', err);
+  }
 }
 
 const voicesDir = path.join(__dirname, '..', 'uploads', 'voices');
@@ -74,11 +85,13 @@ router.post('/upload', upload.single('audio'), async (req, res) => {
     const filePath = '/uploads/voices/' + req.file.filename;
     const duration = parseInt(req.body.duration) || 0;
 
-    database.run(
-      'INSERT INTO voice_recordings (id, user_id, file_path, duration, file_size) VALUES (?, ?, ?, ?, ?)',
-      [id, req.body.userId, filePath, duration, req.file.size]
+    const stmt = database.prepare(
+      'INSERT INTO voice_recordings (id, user_id, file_path, duration, file_size) VALUES (?, ?, ?, ?, ?)'
     );
-    saveDb();
+    stmt.bind([id, req.body.userId, filePath, duration, req.file.size]);
+    stmt.step();
+    stmt.free();
+    persistDb();
 
     res.json({ id, url: filePath, duration, file_size: req.file.size, created_at: new Date().toISOString() });
   } catch (err) {
@@ -90,14 +103,13 @@ router.post('/upload', upload.single('audio'), async (req, res) => {
 router.get('/list', async (req, res) => {
   try {
     const database = await getDb();
-    const results = database.exec('SELECT * FROM voice_recordings ORDER BY created_at DESC');
-    if (results.length === 0) return res.json([]);
-    const cols = results[0].columns;
-    const rows = results[0].values.map(row => {
-      const obj = {};
-      cols.forEach((col, i) => { obj[col] = row[i]; });
-      return obj;
-    });
+    const stmt = database.prepare('SELECT id, user_id, file_path, duration, file_size, created_at FROM voice_recordings ORDER BY created_at DESC');
+    const rows = [];
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      rows.push(row);
+    }
+    stmt.free();
     res.json(rows);
   } catch (err) {
     console.error('List voices error:', err);
@@ -105,20 +117,50 @@ router.get('/list', async (req, res) => {
   }
 });
 
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const database = await getDb();
+    const stmt = database.prepare('SELECT id, user_id, file_path, duration, file_size, created_at FROM voice_recordings WHERE user_id = ? ORDER BY created_at DESC');
+    stmt.bind([req.params.userId]);
+    const rows = [];
+    while (stmt.step()) {
+      rows.push(stmt.getAsObject());
+    }
+    stmt.free();
+    res.json(rows);
+  } catch (err) {
+    console.error('List user voices error:', err);
+    res.status(500).json({ error: 'Failed to list voices' });
+  }
+});
+
 router.delete('/:id', async (req, res) => {
   try {
     const database = await getDb();
-    const results = database.exec('SELECT file_path FROM voice_recordings WHERE id = ?', [req.params.id]);
-    if (results.length === 0 || results[0].values.length === 0) {
+    const stmt = database.prepare('SELECT file_path FROM voice_recordings WHERE id = ?');
+    stmt.bind([req.params.id]);
+    let filePath = null;
+    if (stmt.step()) {
+      const row = stmt.getAsObject();
+      filePath = row.file_path;
+    }
+    stmt.free();
+
+    if (!filePath) {
       return res.status(404).json({ error: 'Recording not found' });
     }
-    const filePath = results[0].values[0][0];
+
     const fullPath = path.join(__dirname, '..', filePath);
     if (fs.existsSync(fullPath)) {
       fs.unlinkSync(fullPath);
     }
-    database.run('DELETE FROM voice_recordings WHERE id = ?', [req.params.id]);
-    saveDb();
+
+    const delStmt = database.prepare('DELETE FROM voice_recordings WHERE id = ?');
+    delStmt.bind([req.params.id]);
+    delStmt.step();
+    delStmt.free();
+    persistDb();
+
     res.json({ success: true });
   } catch (err) {
     console.error('Delete voice error:', err);
