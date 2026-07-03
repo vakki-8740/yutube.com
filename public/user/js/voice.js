@@ -185,50 +185,65 @@ function uploadVoiceRecording() {
   xhr.send(formData);
 }
 
+let _voiceLoadTimer = null;
 async function loadVoiceRecordings() {
-  const list = document.getElementById('voiceList');
-  const empty = document.getElementById('voiceEmpty');
-  try {
-    const res = await fetch(VOICE_API + '/api/voices/list');
-    const recordings = await res.json();
-    if (recordings.length === 0) {
-      list.innerHTML = '';
-      list.appendChild(empty);
-      empty.style.display = 'block';
-      return;
-    }
-    empty.style.display = 'none';
-    list.innerHTML = recordings.map(r => {
-      const user = (typeof allUsers !== 'undefined' && allUsers.find) ? allUsers.find(u => u.id === r.user_id) : null;
-      const name = user ? user.name : 'User';
-      const initial = name.charAt(0).toUpperCase();
-      const avatar = (user && user.photoURL) ? '<img src="' + user.photoURL + '">' : initial;
-      const isOwner = r.user_id === myId;
-      const timeAgo = r.created_at ? getTimeAgo(new Date(r.created_at + 'Z')) : '';
-      const listened = getListenedVoices().includes(r.id);
-      return '<div class="voice-card' + (!listened ? ' is-recent' : '') + '" data-id="' + r.id + '">' +
-        '<div class="voice-card-header">' +
-          '<div class="voice-card-avatar">' + avatar + '</div>' +
-          '<div class="voice-card-info">' +
-            '<div class="voice-card-name">' + escapeHtml(name) + (!listened ? '<span class="voice-new-badge">NEW</span>' : '') + '</div>' +
-            '<div class="voice-card-time">' + timeAgo + '</div>' +
-          '</div>' +
-          (isOwner ? '<button class="voice-card-delete" onclick="deleteVoiceRecording(\'' + r.id + '\')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' : '') +
-        '</div>' +
-        '<div class="voice-card-player">' +
-          '<button class="voice-card-play" onclick="playVoiceCard(this, \'' + VOICE_API + r.file_path + '\')">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>' +
-          '</button>' +
-          '<div class="voice-card-bar" onclick="seekVoiceCard(event, this)" data-dur="' + (r.duration || 0) + '">' +
-            '<div class="voice-card-bar-fill"></div>' +
-          '</div>' +
-          '<span class="voice-card-dur">' + formatDuration(r.duration || 0) + '</span>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  } catch (err) {
-    list.innerHTML = '<div class="voice-empty">Failed to load recordings.</div>';
-  }
+  if (_voiceLoadTimer) clearTimeout(_voiceLoadTimer);
+  return new Promise(resolve => {
+    _voiceLoadTimer = setTimeout(async () => {
+      const list = document.getElementById('voiceList');
+      const empty = document.getElementById('voiceEmpty');
+      try {
+        const res = await fetch(VOICE_API + '/api/voices/list?t=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) throw new Error('Server error');
+        const recordings = await res.json();
+        if (recordings.length === 0) {
+          list.innerHTML = '';
+          const emptyClone = empty.cloneNode(true);
+          list.appendChild(emptyClone);
+          emptyClone.style.display = 'block';
+          resolve();
+          return;
+        }
+        empty.style.display = 'none';
+        list.innerHTML = recordings.map(r => {
+          const user = (typeof allUsers !== 'undefined' && allUsers.find) ? allUsers.find(u => u.id === r.user_id) : null;
+          const name = user ? user.name : 'User';
+          const initial = name.charAt(0).toUpperCase();
+          const avatar = (user && user.photoURL) ? '<img src="' + user.photoURL + '">' : initial;
+          const isOwner = r.user_id === myId;
+          const timeAgo = r.created_at ? getTimeAgo(new Date(r.created_at + 'Z')) : '';
+          const listened = getListenedVoices().includes(r.id);
+          return '<div class="voice-card' + (!listened ? ' is-recent' : '') + '" data-id="' + r.id + '">' +
+            '<div class="voice-card-header">' +
+              '<div class="voice-card-avatar">' + avatar + '</div>' +
+              '<div class="voice-card-info">' +
+                '<div class="voice-card-name">' + escapeHtml(name) + (!listened ? '<span class="voice-new-badge">NEW</span>' : '') + '</div>' +
+                '<div class="voice-card-time">' + timeAgo + '</div>' +
+              '</div>' +
+              (isOwner ? '<button class="voice-card-delete" onclick="deleteVoiceRecording(\'' + r.id + '\')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' : '') +
+            '</div>' +
+            '<div class="voice-card-player">' +
+              '<button class="voice-card-play" onclick="playVoiceCard(this, \'' + VOICE_API + r.file_path + '\')">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>' +
+              '</button>' +
+              '<div class="voice-card-bar" onclick="seekVoiceCard(event, this)" data-dur="' + (r.duration || 0) + '">' +
+                '<div class="voice-card-bar-fill"></div>' +
+              '</div>' +
+              '<span class="voice-card-dur">' + formatDuration(r.duration || 0) + '</span>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+        resolve();
+      } catch (err) {
+        if (list.children.length > 1 || (list.children.length === 1 && !list.children[0].classList.contains('voice-empty'))) {
+          resolve();
+          return;
+        }
+        list.innerHTML = '<div class="voice-empty">Failed to load. Pull down to refresh.</div>';
+        resolve();
+      }
+    }, 300);
+  });
 }
 
 function playVoiceCard(btn, url) {
