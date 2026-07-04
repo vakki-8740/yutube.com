@@ -673,7 +673,7 @@ button:active {
 .msg-bubble-wrap {
   display: flex;
   flex-direction: column;
-  max-width: 75%;
+  max-width: 85%;
 }
 
 .message-wrapper.own .msg-bubble-wrap {
@@ -682,6 +682,7 @@ button:active {
 
 .message-wrapper.other .msg-bubble-wrap {
   align-items: flex-start;
+  max-width: 80%;
 }
 
 .message-wrapper .msg-sender {
@@ -2563,7 +2564,7 @@ button:active {
   }
 
   .msg-bubble-wrap {
-    max-width: 80%;
+    max-width: 88%;
   }
 
   .message-wrapper {
@@ -2782,7 +2783,7 @@ button:active {
   }
 
   .msg-bubble-wrap {
-    max-width: 82%;
+    max-width: 90%;
   }
 
   .message-wrapper {
