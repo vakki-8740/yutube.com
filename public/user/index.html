@@ -604,6 +604,88 @@ button:active {
   color: var(--ios-green);
 }
 
+/* ==================== CHAT HEADS ROW ==================== */
+.chat-heads-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.chat-heads-row::-webkit-scrollbar {
+  display: none;
+}
+.chat-head-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  min-width: 56px;
+  transition: transform 0.15s;
+}
+.chat-head-item:active {
+  transform: scale(0.92);
+}
+.chat-head-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+  border: 2.5px solid transparent;
+  transition: border-color 0.2s;
+}
+.chat-head-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.chat-head-item.active .chat-head-avatar {
+  border-color: var(--ios-blue);
+  background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+}
+.chat-head-name {
+  font-size: 11px;
+  color: var(--ios-gray);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 56px;
+  text-align: center;
+}
+.chat-head-item.active .chat-head-name {
+  color: var(--ios-blue);
+  font-weight: 600;
+}
+.chat-head-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid white;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.chat-head-dot.online {
+  background: var(--ios-green);
+}
+.chat-head-dot.offline {
+  background: var(--ios-gray3);
+}
+
 /* ==================== MESSAGES ==================== */
 .messages-area {
   flex: 1;
@@ -2329,22 +2411,19 @@ button:active {
   }
 
   .user-list-area {
-    width: 100%;
+    width: 35%;
+    min-width: 120px;
     height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 10;
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: transform;
+    flex-shrink: 0;
   }
 
   .user-list-area.hide {
-    transform: translateX(-100%);
+    display: none;
   }
 
   .chat-area {
-    width: 100%;
+    flex: 1;
+    width: auto;
   }
 
   .chat-view .back-btn {
@@ -2523,6 +2602,20 @@ button:active {
 
   .chat-view .ch-name {
     font-size: 15px;
+  }
+
+  .chat-heads-row {
+    padding: 8px 12px;
+    gap: 10px;
+  }
+  .chat-head-avatar {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+  }
+  .chat-head-name {
+    font-size: 10px;
+    max-width: 50px;
   }
 
   .chat-view .back-btn {
@@ -2916,6 +3009,8 @@ button:active {
                   <button class="call-btn" onclick="startCall(selectedUserId,'video')" title="Video Call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></button>
                 </div>
               </div>
+
+              <div class="chat-heads-row" id="chatHeadsRow"></div>
 
               <div class="messages-area" id="messagesArea">
                 <div class="typing-indicator" id="typingIndicator">

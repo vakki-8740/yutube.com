@@ -439,6 +439,8 @@ function renderUsers() {
       </div>
     `;
   }).join('');
+
+  renderChatHeadRow();
 }
 
 function formatLastSeen(isoStr) {
@@ -451,6 +453,37 @@ function formatLastSeen(isoStr) {
   if (hrs < 24) return hrs + 'h ago';
   const days = Math.floor(hrs / 24);
   return days + 'd ago';
+}
+
+
+// ==================== CHAT HEADS ROW ====================
+function renderChatHeadRow() {
+  const row = document.getElementById('chatHeadsRow');
+  if (!row) return;
+  if (allUsers.length === 0) { row.innerHTML = ''; return; }
+  row.innerHTML = allUsers.map(function(user) {
+    var initial = (user.name || 'U').charAt(0).toUpperCase();
+    var avatarContent = user.photoURL
+      ? '<img src="' + user.photoURL + '" alt="" loading="lazy" onerror="this.outerHTML=\'' + initial + '\'">'
+      : initial;
+    var dotClass = user.is_online ? 'online' : 'offline';
+    return '<div class="chat-head-item' + (selectedUserId === user.id ? ' active' : '') + '" data-uid="' + user.id + '" onclick="selectUser(\'' + user.id + '\')">' +
+      '<div class="chat-head-avatar">' + avatarContent + '<div class="chat-head-dot ' + dotClass + '"></div></div>' +
+      '<div class="chat-head-name">' + escapeHtml(user.name) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function highlightChatHead(userId) {
+  var items = document.querySelectorAll('.chat-head-item');
+  items.forEach(function(item) {
+    if (item.dataset.uid === userId) {
+      item.classList.add('active');
+      item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    } else {
+      item.classList.remove('active');
+    }
+  });
 }
 
 
@@ -487,10 +520,7 @@ function selectUser(userId) {
   }
 
   renderUsers();
-
-  if (window.innerWidth <= 768) {
-    document.getElementById('userListArea').classList.add('hide');
-  }
+  highlightChatHead(userId);
 
   listenMessages();
   listenTyping();
@@ -499,7 +529,6 @@ function selectUser(userId) {
 }
 
 function goBack() {
-  document.getElementById('userListArea').classList.remove('hide');
   selectedUserId = null;
   document.getElementById('emptyState').style.display = 'flex';
   document.getElementById('chatView').classList.remove('show');
@@ -507,6 +536,7 @@ function goBack() {
   if (unsubTyping) { unsubTyping(); unsubTyping = null; }
   if (unsubRecording) { unsubRecording(); unsubRecording = null; }
   cancelReply();
+  renderChatHeadRow();
 }
 
 // ==================== MESSAGES ====================
