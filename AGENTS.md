@@ -30,6 +30,8 @@
 - **Voice Recordings Fix**: Added cache-busting (`?t=Date.now()`), `cache: 'no-store'`, debounce (300ms), safe error handling on `loadVoiceRecordings()`
 - **Voice Button Removed**: Removed voice-negative-btn from chat input bar (chat.css + mobile.css cleanup)
 - **Input Bar Cleanup**: Consolidated duplicate `.send-btn` rules, removed `overflow: hidden` from `.input-bar`
+- **Voice Persistence Fix**: Migrated voice recordings from SQLite (sql.js) to PostgreSQL + base64 audio storage. Fix for Render ephemeral filesystem wiping SQLite data on dyno restart. Removed sql.js dependency, used multer.memoryStorage(), audio stored as base64 TEXT in PostgreSQL.
+- **Online/Offline Fix**: Added error handler to Firestore onSnapshot listener in listenUsers(). Re-subscribe listenUsers() on visibilitychange (tab visible) to fix mobile browsers pausing/throttling the snapshot listener in background.
 
 ### In Progress
 - (none)
