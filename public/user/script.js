@@ -600,14 +600,12 @@ function listenMessages() {
   loadedMsgIds.clear();
   hasMoreMessages = true;
 
-  // Add load more button
   const loadMoreDiv = document.createElement('div');
   loadMoreDiv.className = 'load-more-msgs';
   loadMoreDiv.id = 'loadMoreDiv';
   loadMoreDiv.innerHTML = '<button onclick="loadMoreMessages()">Load earlier messages</button>';
   area.insertBefore(loadMoreDiv, typingEl);
 
-  let lastDate = '';
   let isInitial = true;
   let msgCount = 0;
 
@@ -616,40 +614,38 @@ function listenMessages() {
     .orderBy('created_at', 'asc')
     .limitToLast(messagePageLimit)
     .onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added' && !loadedMsgIds.has(change.doc.id)) {
-          loadedMsgIds.add(change.doc.id);
-          msgCount++;
-          const data = change.doc.data();
-          const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
-
-          if (isInitial) {
-            const msgDate = new Date(msg.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-            if (msgDate !== lastDate) {
-              const sep = document.createElement('div');
-              sep.className = 'date-separator';
-              sep.innerHTML = '<span>' + msgDate + '</span>';
-              area.insertBefore(sep, typingEl);
-              lastDate = msgDate;
-            }
-          }
-
-          appendMessageToArea(msg, typingEl, !isInitial);
-          if (!isInitial) {
-            const a = document.getElementById('messagesArea');
-            if (a && a.scrollHeight - a.scrollTop - a.clientHeight < 200) {
-              scrollToBottom();
-            }
-          }
-        } else if (change.type === 'modified') {
-          const data = change.doc.data();
-          const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
-          updateMessageInDOM(msg);
-        }
-      });
-
       if (isInitial) {
-        isInitial = false;
+        // Batch render: collect all, sort, insert with DocumentFragment
+        const msgs = [];
+        snapshot.forEach((doc) => {
+          if (!loadedMsgIds.has(doc.id)) {
+            loadedMsgIds.add(doc.id);
+            msgCount++;
+            const data = doc.data();
+            msgs.push({ id: doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at });
+          }
+        });
+
+        // Sort by created_at ascending
+        msgs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+        // Use DocumentFragment for fast batch insert
+        const frag = document.createDocumentFragment();
+        let lastDate = '';
+        msgs.forEach((msg) => {
+          const msgDate = new Date(msg.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          if (msgDate !== lastDate) {
+            const sep = document.createElement('div');
+            sep.className = 'date-separator';
+            sep.innerHTML = '<span>' + msgDate + '</span>';
+            frag.appendChild(sep);
+            lastDate = msgDate;
+          }
+          const el = createMessageElement(msg);
+          if (el) frag.appendChild(el);
+        });
+        area.insertBefore(frag, typingEl);
+
         if (msgCount >= messagePageLimit) {
           hasMoreMessages = true;
           loadMoreDiv.classList.add('show');
@@ -657,7 +653,26 @@ function listenMessages() {
           hasMoreMessages = false;
           loadMoreDiv.classList.remove('show');
         }
+        isInitial = false;
         scrollToBottom();
+      } else {
+        // Real-time updates: only process changes
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added' && !loadedMsgIds.has(change.doc.id)) {
+            loadedMsgIds.add(change.doc.id);
+            const data = change.doc.data();
+            const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
+            appendMessageToArea(msg, typingEl, true);
+            const a = document.getElementById('messagesArea');
+            if (a && a.scrollHeight - a.scrollTop - a.clientHeight < 200) {
+              scrollToBottom();
+            }
+          } else if (change.type === 'modified') {
+            const data = change.doc.data();
+            const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
+            updateMessageInDOM(msg);
+          }
+        });
       }
     });
 
@@ -688,74 +703,79 @@ async function loadMoreMessages() {
   const loadMoreDiv = document.getElementById('loadMoreDiv');
   const oldScrollHeight = area.scrollHeight;
 
-  // Stop old listener
   if (unsubMessages) { unsubMessages(); unsubMessages = null; }
 
-  // Find oldest loaded message timestamp
-  let oldestTs = null;
-  const wrappers = area.querySelectorAll('.message-wrapper');
-  for (let i = 0; i < wrappers.length; i++) {
-    const msgId = wrappers[i].dataset.msgId;
-    if (loadedMsgIds.has(msgId)) {
-      const timeEl = wrappers[i].querySelector('.message-time');
-      if (timeEl) {
-        const parts = timeEl.textContent.trim().split(':');
-        if (parts.length === 2) {
-          oldestTs = timeEl.textContent.trim();
-          break;
-        }
-      }
-    }
-  }
-
-  // Increase limit for next load
   messagePageLimit += 50;
 
-  // Re-setup listener with higher limit
-  let newMsgCount = 0;
-  let lastDate = '';
+  let isInitialLoad = true;
 
   unsubMessages = db.collection('messages')
     .where('conversation', '==', convId)
     .orderBy('created_at', 'asc')
     .limitToLast(messagePageLimit)
     .onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added' && !loadedMsgIds.has(change.doc.id)) {
-          loadedMsgIds.add(change.doc.id);
-          newMsgCount++;
-          const data = change.doc.data();
-          const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
+      if (isInitialLoad) {
+        // Collect new messages only
+        const newMsgs = [];
+        snapshot.forEach((doc) => {
+          if (!loadedMsgIds.has(doc.id)) {
+            loadedMsgIds.add(doc.id);
+            const data = doc.data();
+            newMsgs.push({ id: doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at });
+          }
+        });
 
+        // Sort by created_at ascending
+        newMsgs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+        // Batch insert with DocumentFragment
+        const frag = document.createDocumentFragment();
+        let lastDate = '';
+        newMsgs.forEach((msg) => {
           const msgDate = new Date(msg.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
           if (msgDate !== lastDate) {
             const sep = document.createElement('div');
             sep.className = 'date-separator';
             sep.innerHTML = '<span>' + msgDate + '</span>';
-            area.insertBefore(sep, loadMoreDiv);
+            frag.appendChild(sep);
             lastDate = msgDate;
           }
+          const el = createMessageElement(msg);
+          if (el) frag.appendChild(el);
+        });
+        area.insertBefore(frag, loadMoreDiv);
 
-          const wrapper = createMessageElement(msg);
-          if (wrapper) area.insertBefore(wrapper, loadMoreDiv);
-        }
-      });
-
-      // Maintain scroll position after prepending
-      if (newMsgCount > 0) {
+        // Maintain scroll position
         const newScrollHeight = area.scrollHeight;
         area.scrollTop = newScrollHeight - oldScrollHeight;
-        newMsgCount = 0;
-      }
 
-      // Check if we loaded everything
-      const totalMsgs = area.querySelectorAll('.message-wrapper').length;
-      if (totalMsgs < messagePageLimit) {
-        hasMoreMessages = false;
-        loadMoreDiv.classList.remove('show');
-      }
+        const totalMsgs = area.querySelectorAll('.message-wrapper').length;
+        if (totalMsgs < messagePageLimit) {
+          hasMoreMessages = false;
+          loadMoreDiv.classList.remove('show');
+        }
 
-      setupScrollTracking();
+        isInitialLoad = false;
+        setupScrollTracking();
+      } else {
+        // Real-time updates
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added' && !loadedMsgIds.has(change.doc.id)) {
+            loadedMsgIds.add(change.doc.id);
+            const data = change.doc.data();
+            const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
+            appendMessageToArea(msg, loadMoreDiv, true);
+            const a = document.getElementById('messagesArea');
+            if (a && a.scrollHeight - a.scrollTop - a.clientHeight < 200) {
+              scrollToBottom();
+            }
+          } else if (change.type === 'modified') {
+            const data = change.doc.data();
+            const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
+            updateMessageInDOM(msg);
+          }
+        });
+      }
     });
 
   isLoadingMore = false;

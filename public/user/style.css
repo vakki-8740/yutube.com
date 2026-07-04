@@ -687,7 +687,7 @@ button:active {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 16px 20px;
+  padding: 12px 10px;
   min-width: 0;
 }
 
@@ -698,7 +698,7 @@ button:active {
 .message-wrapper {
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   animation: msgIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   max-width: 80%;
@@ -712,11 +712,13 @@ button:active {
 .message-wrapper.own {
   align-self: flex-end;
   align-items: flex-end;
+  margin-left: auto;
 }
 
 .message-wrapper.other {
   align-self: flex-start;
   align-items: flex-start;
+  margin-right: auto;
 }
 
 .message-wrapper .msg-sender {
@@ -733,11 +735,15 @@ button:active {
 
 .message-bubble {
   max-width: 75%;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 18px;
   font-size: var(--msg-font-size);
   line-height: 1.35;
   word-wrap: break-word;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  white-space: pre-wrap;
   position: relative;
   cursor: pointer;
 }
@@ -2758,13 +2764,13 @@ button:active {
 /* ==================== SMALL MOBILE 420px ==================== */
 @media (max-width: 420px) {
   .message-bubble {
-    max-width: 90%;
+    max-width: 88%;
     font-size: var(--msg-font-size);
-    padding: 8px 12px;
+    padding: 7px 11px;
   }
 
   .message-wrapper {
-    max-width: 90%;
+    max-width: 88%;
   }
 
   .user-item {
