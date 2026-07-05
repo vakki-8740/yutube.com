@@ -333,6 +333,8 @@ async function joinChat() {
     // Remove old beforeunload if any, then add new one
     window.removeEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('beforeunload', handleBeforeUnload);
+    window.removeEventListener('pagehide', handlePageHide);
+    window.addEventListener('pagehide', handlePageHide);
 
     showMainApp();
   } catch (err) {
@@ -347,12 +349,21 @@ function handleBeforeUnload() {
   db.collection('users').doc(myId).update({
     is_online: false,
     last_seen: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  }).catch(() => {});
   if (heartbeatInterval) clearInterval(heartbeatInterval);
   if (unsubUsers) unsubUsers();
   if (unsubMessages) unsubMessages();
   if (unsubTyping) unsubTyping();
   if (unsubRecording) unsubRecording();
+}
+
+function handlePageHide() {
+  if (myId) {
+    db.collection('users').doc(myId).update({
+      is_online: false,
+      last_seen: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => {});
+  }
 }
 
 document.getElementById('nameInput').addEventListener('keydown', (e) => {
@@ -398,8 +409,8 @@ function showMainApp() {
       db.collection('users').doc(myId).set({ is_online: true, last_active: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
       if (!heartbeatInterval) {
         heartbeatInterval = setInterval(() => {
-          db.collection('users').doc(myId).update({ last_active: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
-        }, 30000);
+          db.collection('users').doc(myId).update({ is_online: true, last_active: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
+        }, 15000);
       }
       listenUsers();
     }
