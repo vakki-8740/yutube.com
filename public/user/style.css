@@ -2439,8 +2439,8 @@ button:active {
   margin-bottom: 2px;
 }
 .voice-pack-header .vpb-name { font-size: 12px; font-weight: 600; color: var(--ios-blue); }
-.voice-pack-bubble.incoming .voice-pack-header .vpb-name { color: var(--ios-green); }
-.voice-pack-header .vpb-time { font-size: 11px; color: var(--ios-gray); }
+.voice-pack-bubble.incoming .voice-pack-header .vpb-name { color: #1a8a3f; }
+.voice-pack-header .vpb-time { font-size: 11px; color: var(--ios-text2); }
 .voice-pack-body {
   background: var(--ios-card);
   border-radius: 16px;
@@ -2454,7 +2454,7 @@ button:active {
 .voice-pack-bubble.incoming .voice-pack-body { background: var(--ios-card); border-bottom-left-radius: 4px; }
 .voice-pack-bubble.outgoing .voice-pack-header { justify-content: flex-end; }
 .voice-pack-bubble.outgoing .voice-pack-header .vpb-name { display: none; }
-.voice-pack-bubble.outgoing .voice-pack-header .vpb-time { color: rgba(255,255,255,0.7); }
+.voice-pack-bubble.outgoing .voice-pack-header .vpb-time { color: rgba(255,255,255,0.9); }
 
 /* Reply Reference */
 .voice-pack-reply-ref {
@@ -2465,11 +2465,11 @@ button:active {
   background: rgba(0,0,0,0.06);
   border-radius: 8px;
   font-size: 11px;
-  color: var(--ios-gray);
+  color: var(--ios-text2);
   margin-bottom: 2px;
   cursor: pointer;
 }
-.voice-pack-bubble.outgoing .voice-pack-reply-ref { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
+.voice-pack-bubble.outgoing .voice-pack-reply-ref { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.95); }
 .voice-pack-reply-ref .vpr-icon { font-size: 10px; flex-shrink: 0; }
 .voice-pack-reply-ref .vpr-label { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -2507,8 +2507,8 @@ button:active {
 .voice-pack-bar-fill { height: 100%; background: var(--ios-blue); border-radius: 2px; width: 0%; transition: width 0.1s linear; pointer-events: none; }
 .voice-pack-bubble.outgoing .voice-pack-bar { background: rgba(255,255,255,0.25); }
 .voice-pack-bubble.outgoing .voice-pack-bar-fill { background: white; }
-.voice-pack-dur { font-size: 11px; color: var(--ios-gray); font-variant-numeric: tabular-nums; flex-shrink: 0; min-width: 28px; text-align: right; }
-.voice-pack-bubble.outgoing .voice-pack-dur { color: rgba(255,255,255,0.7); }
+.voice-pack-dur { font-size: 11px; color: var(--ios-text2); font-variant-numeric: tabular-nums; flex-shrink: 0; min-width: 28px; text-align: right; }
+.voice-pack-bubble.outgoing .voice-pack-dur { color: rgba(255,255,255,0.9); }
 
 /* Bubble Actions (Reply + React Buttons) */
 .voice-pack-actions {
@@ -2522,7 +2522,7 @@ button:active {
   border: none;
   font-size: 11px;
   font-weight: 600;
-  color: var(--ios-gray);
+  color: var(--ios-text2);
   cursor: pointer;
   padding: 3px 8px;
   border-radius: 8px;
@@ -2532,8 +2532,11 @@ button:active {
   gap: 3px;
 }
 .voice-pack-action:active { background: var(--ios-gray6); }
-.voice-pack-bubble.outgoing .voice-pack-action { color: rgba(255,255,255,0.7); }
+.voice-pack-bubble.outgoing .voice-pack-action { color: rgba(255,255,255,0.9); }
 .voice-pack-bubble.outgoing .voice-pack-action:active { background: rgba(255,255,255,0.15); }
+
+.voice-pack-action.delete-action { color: var(--ios-red); }
+.voice-pack-bubble.outgoing .voice-pack-action.delete-action { color: rgba(255,255,255,0.9); }
 
 /* Reactions */
 .voice-pack-reactions {

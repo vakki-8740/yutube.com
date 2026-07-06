@@ -2244,6 +2244,11 @@ function renderVoicePackBubble(p) {
     replyHtml = '<div class="voice-pack-reply-ref"><span class="vpr-icon">↩</span><span class="vpr-label">' + escapeHtml(repliedName) + '</span></div>';
   }
 
+  var deleteBtn = '';
+  if (isOutgoing) {
+    deleteBtn = '<button class="voice-pack-action delete-action" onclick="deleteVoicePack(\'' + p.id + '\')">🗑️ Delete</button>';
+  }
+
   return '<div class="voice-pack-bubble ' + side + '">' +
     '<div class="voice-pack-header">' +
       '<span class="vpb-name">' + escapeHtml(name) + '</span>' +
@@ -2263,6 +2268,7 @@ function renderVoicePackBubble(p) {
       reactionsHtml +
     '</div>' +
     '<div class="voice-pack-actions">' +
+      deleteBtn +
       '<button class="voice-pack-action" onclick="replyToVoiceMsg(\'' + p.id + '\',\'' + escapeHtmlAttr(name) + '\')">💬 Reply</button>' +
       '<button class="voice-pack-action" onclick="showEmojiPicker(event,\'' + p.id + '\')">😊 React</button>' +
     '</div>' +
@@ -2574,8 +2580,15 @@ async function voiceToggleReaction(recordingId, emoji) {
   }
 }
 
-function deleteVoiceRecording(id) {
-  // kept as no-op stub for any lingering inline onclick references
+async function deleteVoicePack(id) {
+  if (!confirm('Delete this voice pack?')) return;
+  try {
+    var res = await fetch(VOICE_API + '/api/voices/' + id, { method: 'DELETE' });
+    if (res.ok) loadVoiceConvMsgs();
+    else alert('Failed to delete.');
+  } catch (err) {
+    alert('Failed to delete.');
+  }
 }
 
 function getTimeAgo(date) {
