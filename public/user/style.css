@@ -2499,7 +2499,7 @@ button:active {
 .voice-pack-bubble.incoming .voice-pack-body { background: var(--ios-card); border-bottom-left-radius: 4px; }
 .voice-pack-bubble.outgoing .voice-pack-header { justify-content: flex-end; }
 .voice-pack-bubble.outgoing .voice-pack-header .vpb-name { display: none; }
-.voice-pack-bubble.outgoing .voice-pack-header .vpb-time { color: rgba(255,255,255,0.9); }
+.voice-pack-bubble.outgoing .voice-pack-header .vpb-time { color: var(--ios-text2); }
 
 /* Reply Reference */
 .voice-pack-reply-ref {
@@ -2514,7 +2514,7 @@ button:active {
   margin-bottom: 2px;
   cursor: pointer;
 }
-.voice-pack-bubble.outgoing .voice-pack-reply-ref { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.95); }
+.voice-pack-bubble.outgoing .voice-pack-reply-ref { background: rgba(0,0,0,0.06); color: var(--ios-text2); }
 .voice-pack-reply-ref .vpr-icon { font-size: 10px; flex-shrink: 0; }
 .voice-pack-reply-ref .vpr-label { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -2553,7 +2553,7 @@ button:active {
 .voice-pack-bubble.outgoing .voice-pack-bar { background: rgba(255,255,255,0.25); }
 .voice-pack-bubble.outgoing .voice-pack-bar-fill { background: white; }
 .voice-pack-dur { font-size: 11px; color: var(--ios-text2); font-variant-numeric: tabular-nums; flex-shrink: 0; min-width: 28px; text-align: right; }
-.voice-pack-bubble.outgoing .voice-pack-dur { color: rgba(255,255,255,0.9); }
+.voice-pack-bubble.outgoing .voice-pack-dur { color: var(--ios-text2); }
 
 /* Bubble Actions (Reply + React Buttons) */
 .voice-pack-actions {
