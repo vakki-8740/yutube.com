@@ -2577,15 +2577,10 @@ button:active {
   gap: 3px;
 }
 .voice-pack-action:active { background: var(--ios-gray6); }
-.voice-pack-bubble.outgoing .voice-pack-action { color: rgba(255,255,255,0.9); }
-.voice-pack-bubble.outgoing .voice-pack-action:active { background: rgba(255,255,255,0.15); }
 
 .voice-pack-action--delete { color: var(--ios-red); }
 .voice-pack-action--reply { color: #FF9500; }
 .voice-pack-action--react { color: var(--ios-blue); }
-.voice-pack-bubble.outgoing .voice-pack-action--delete,
-.voice-pack-bubble.outgoing .voice-pack-action--reply,
-.voice-pack-bubble.outgoing .voice-pack-action--react { color: rgba(255,255,255,0.9); }
 
 /* Reactions */
 .voice-pack-reactions {
