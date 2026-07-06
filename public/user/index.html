@@ -221,87 +221,91 @@
       <!-- Voice Page -->
       <div class="page" id="voicePage">
         <div class="voice-page">
-          <div class="voice-list-header">
-            All Recordings
-          </div>
-          <div class="voice-list" id="voiceList">
-            <div class="voice-empty" id="voiceEmpty">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ios-gray3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                <line x1="12" y1="19" x2="12" y2="23"/>
-                <line x1="8" y1="23" x2="16" y2="23"/>
-              </svg>
-              <div>No recordings yet</div>
-              <div style="font-size:13px;margin-top:4px;">Tap the mic button below to record</div>
-            </div>
-          </div>
 
-          <div class="voice-fab" onclick="startVoiceRec()" id="voiceFabBtn" title="Record Voice">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-              <line x1="12" y1="19" x2="12" y2="23"/>
-              <line x1="8" y1="23" x2="16" y2="23"/>
-            </svg>
-          </div>
-
-          <div class="voice-recording-sheet" id="voiceRecordingUI" style="display:none;">
-            <div class="voice-sheet-handle"></div>
-            <div class="voice-sheet-content">
-              <div class="voice-rec-indicator">
-                <div class="voice-rec-dot"></div>
-                <div class="voice-rec-label">Recording</div>
-              </div>
-              <div class="voice-rec-timer" id="voiceRecTimer">0:00</div>
-              <div class="voice-rec-controls">
-                <button class="voice-cancel-btn" onclick="cancelVoiceRec()">Cancel</button>
-                <button class="voice-stop-btn" onclick="stopVoiceRec()">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-                </button>
+          <!-- User List View -->
+          <div id="voiceUserView">
+            <div class="voice-list-header">Send Voice Pack</div>
+            <div class="voice-user-list" id="voiceUserList">
+              <div class="voice-empty" id="voiceUserEmpty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ios-gray3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <div>No users found</div>
               </div>
             </div>
           </div>
 
-          <div class="voice-preview-sheet" id="voicePreviewUI" style="display:none;">
-            <div class="voice-sheet-handle"></div>
-            <div class="voice-sheet-content">
-              <div class="voice-preview-row">
-                <button class="voice-preview-play" id="voicePreviewPlay" onclick="toggleVoicePreview()">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-                <span class="voice-preview-dur" id="voicePreviewDur">0:00</span>
-              </div>
-              <div class="voice-preview-actions">
-                <button class="voice-preview-btn delete" onclick="deleteVoicePreview()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                  Delete
-                </button>
-                <button class="voice-preview-btn record" onclick="reRecordVoice()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
-                  Re-record
-                </button>
-                <button class="voice-preview-btn upload" id="voiceUploadBtn" onclick="uploadVoiceRecording()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Upload
-                </button>
-              </div>
-              <div class="voice-upload-progress" id="voiceUploadProgress" style="display:none;">
-                <div class="voice-progress-bar"><div class="voice-progress-fill" id="voiceProgressFill"></div></div>
-                <div class="voice-progress-label" id="voiceProgressLabel">Uploading...</div>
+          <!-- Conversation View -->
+          <div id="voiceConvView" style="display:none;">
+            <div class="voice-conv-header">
+              <button class="voice-back-btn" onclick="closeVoiceConv()">←</button>
+              <div class="voice-conv-avatar" id="voiceConvAvatar">U</div>
+              <div class="voice-conv-name" id="voiceConvName">User</div>
+            </div>
+
+            <div class="voice-conv-msgs" id="voiceConvMsgs">
+              <div class="voice-conv-empty" id="voiceConvEmpty">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--ios-gray3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+                <div>No voice packs yet</div>
+                <div style="font-size:12px;margin-top:4px;">Tap the mic to send a voice pack</div>
               </div>
             </div>
-          </div>
 
-          <div class="voice-recording-sheet" id="voiceUserSelectUI" style="display:none;">
-            <div class="voice-sheet-handle"></div>
-            <div class="voice-sheet-content">
-              <div style="font-weight:600;font-size:16px;margin-bottom:12px;">Send to...</div>
-              <div id="voiceUserSelectList" style="max-height:300px;overflow-y:auto;"></div>
-              <button class="voice-cancel-btn" onclick="hideVoiceUserSelect()" style="margin-top:12px;width:100%;">Cancel</button>
+            <!-- Reply Bar -->
+            <div class="voice-reply-bar" id="voiceReplyBar" style="display:none;">
+              <div class="voice-reply-line"></div>
+              <div class="voice-reply-content">
+                <div class="voice-reply-label">Replying</div>
+                <div class="voice-reply-text" id="voiceReplyText"></div>
+              </div>
+              <button class="voice-reply-close" onclick="cancelVoiceReply()">✕</button>
             </div>
-          </div>
 
+            <!-- Emoji Picker Popup -->
+            <div class="voice-emoji-picker" id="voiceEmojiPicker" style="display:none;">
+              <div class="voice-emoji-list">
+                <span class="voice-emoji-opt" onclick="pickReaction('👍')">👍</span>
+                <span class="voice-emoji-opt" onclick="pickReaction('❤️')">❤️</span>
+                <span class="voice-emoji-opt" onclick="pickReaction('😂')">😂</span>
+                <span class="voice-emoji-opt" onclick="pickReaction('😮')">😮</span>
+                <span class="voice-emoji-opt" onclick="pickReaction('😢')">😢</span>
+                <span class="voice-emoji-opt" onclick="pickReaction('🙏')">🙏</span>
+              </div>
+            </div>
+
+            <!-- Input / Recording Bar -->
+            <div class="voice-input-area">
+              <button class="voice-mic-btn" id="voiceMicBtn" onclick="startVoiceConvRec()" title="Record Voice Pack">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+              </button>
+
+              <div class="voice-conv-rec" id="voiceConvRec" style="display:none;">
+                <div class="voice-conv-rec-indicator">
+                  <div class="voice-rec-dot"></div>
+                  <span>Recording</span>
+                </div>
+                <div class="voice-conv-rec-timer" id="voiceConvTimer">0:00</div>
+                <div class="voice-conv-rec-actions">
+                  <button class="voice-rec-action-btn cancel" onclick="cancelVoiceConvRec()">Cancel</button>
+                  <button class="voice-rec-action-btn send" onclick="stopVoiceConvRec()">Send</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>

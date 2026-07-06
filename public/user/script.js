@@ -4,7 +4,7 @@
 // <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
 document.addEventListener('contextmenu', function(e) {
-  if (e.target.closest('.img-msg, .voice-msg, .voice-card, .vp-msg, #imgViewerOverlay, #voicePreviewUI')) {
+  if (e.target.closest('.img-msg, .voice-msg, .voice-card, .vp-msg, .voice-pack-player, .voice-pack-actions, #imgViewerOverlay')) {
     e.preventDefault();
     return false;
   }
@@ -1251,7 +1251,8 @@ function switchTab(tab) {
     document.getElementById('voicePage').classList.add('active');
     document.getElementById('navVoice').classList.add('active');
     document.getElementById('appTitle').textContent = 'Voice';
-    loadVoiceRecordings();
+    closeVoiceConv();
+    loadVoiceUserList();
   }
 }
 
@@ -2102,473 +2103,388 @@ async function sendImage(input) {
 }
 
 
-// ==================== VOICE RECORDING PAGE ====================
+// ==================== VOICE PACK CONVERSATION ====================
 const VOICE_API = 'https://yutube-com-pcu9.onrender.com';
+let voiceConvPartnerId = null;
+let voiceConvPartnerName = '';
+let voiceConvData = [];
+let voiceConvAudio = null;
+let voiceConvPlayEl = null;
+let voiceConvInterval = null;
+let voiceConvPollTimer = null;
+let voiceReplyToId = null;
+let voiceReplyToName = '';
+
 let voiceRecMediaRecorder = null;
 let voiceRecChunks = [];
 let voiceRecStartTime = null;
 let voiceRecTimer = null;
-let voiceRecBlob = null;
-let voiceRecDuration = 0;
-let voiceRecPreviewAudio = null;
-let voiceRecPlaying = false;
-let voiceCardAudio = null;
-let voiceCardInterval = null;
-let voiceCardPlayEl = null;
-let voicePackSendingAudioUrl = null;
-let voicePackSendingDuration = 0;
-let voicePackSendingId = null;
-let voiceRecData = {};
 
-function showVoiceSheet(id) {
-  document.getElementById(id).style.display = 'block';
-  document.querySelector('.bottom-nav').style.display = 'none';
-}
-function hideVoiceSheet(id) {
-  document.getElementById(id).style.display = 'none';
-  document.querySelector('.bottom-nav').style.display = 'flex';
+function escapeHtmlAttr(str) {
+  return (str || '').replace(/['"&<>]/g, function(c) {
+    return '&#' + c.charCodeAt(0) + ';';
+  });
 }
 
-function openVoiceRecorder() {
-  switchTab('voice');
+function loadVoiceUserList() {
+  var list = document.getElementById('voiceUserList');
+  var users = allUsers.filter(function(u) { return u.id !== myId; });
+  if (users.length === 0) {
+    list.innerHTML = '<div class="voice-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ios-gray3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><div>No users found</div></div>';
+    return;
+  }
+  list.innerHTML = users.map(function(u) {
+    var initial = (u.name || 'U').charAt(0).toUpperCase();
+    var avatar = u.photoURL ? '<img src="' + u.photoURL + '">' : initial;
+    return '<div class="voice-user-item" onclick="openVoiceConv(\'' + u.id + '\',\'' + escapeHtmlAttr(u.name) + '\')">' +
+      '<div class="voice-user-avatar">' + avatar + '</div>' +
+      '<div class="voice-user-info">' +
+        '<div class="voice-user-name">' + escapeHtml(u.name) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
-function startVoiceRec() {
+function openVoiceConv(userId, userName) {
+  voiceConvPartnerId = userId;
+  voiceConvPartnerName = userName;
+  document.getElementById('voiceUserView').style.display = 'none';
+  var cv = document.getElementById('voiceConvView');
+  cv.style.display = 'flex';
+  cv.style.flexDirection = 'column';
+  cv.style.height = '100%';
+  document.getElementById('voiceConvName').textContent = userName;
+  var avatar = document.getElementById('voiceConvAvatar');
+  var user = allUsers.find(function(u) { return u.id === userId; });
+  if (user && user.photoURL) {
+    avatar.innerHTML = '<img src="' + user.photoURL + '">';
+  } else {
+    avatar.textContent = (userName || 'U').charAt(0).toUpperCase();
+  }
+  loadVoiceConvMsgs();
+  if (voiceConvPollTimer) clearInterval(voiceConvPollTimer);
+  voiceConvPollTimer = setInterval(loadVoiceConvMsgs, 3000);
+}
+
+function closeVoiceConv() {
+  if (voiceConvAudio) { voiceConvAudio.pause(); voiceConvAudio = null; }
+  if (voiceConvInterval) clearInterval(voiceConvInterval);
+  if (voiceConvPollTimer) clearInterval(voiceConvPollTimer);
+  voiceConvPlayEl = null;
+  voiceConvPartnerId = null;
+  voiceConvData = [];
+  cancelVoiceReply();
+  var cv = document.getElementById('voiceConvView');
+  if (cv) cv.style.display = 'none';
+  var uv = document.getElementById('voiceUserView');
+  if (uv) uv.style.display = 'block';
+}
+
+function scrollVoiceConvDown() {
+  var msgs = document.getElementById('voiceConvMsgs');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function loadVoiceConvMsgs() {
+  if (!voiceConvPartnerId || !myId) return;
+  try {
+    var res = await fetch(VOICE_API + '/api/voices/conversation/' + encodeURIComponent(myId) + '/' + encodeURIComponent(voiceConvPartnerId) + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed');
+    var data = await res.json();
+    var msgsEl = document.getElementById('voiceConvMsgs');
+    var prevCount = voiceConvData.length;
+    voiceConvData = data;
+    if (data.length === 0) {
+      msgsEl.innerHTML = '<div class="voice-conv-empty" id="voiceConvEmpty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--ios-gray3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><div>No voice packs yet</div><div style="font-size:12px;margin-top:4px;">Tap the mic to send a voice pack</div></div>';
+      return;
+    }
+    var html = data.map(function(p) { return renderVoicePackBubble(p); }).join('');
+    msgsEl.innerHTML = html;
+    if (data.length > prevCount) {
+      setTimeout(scrollVoiceConvDown, 50);
+    }
+  } catch (err) {
+    console.error('Voice conv load error:', err);
+  }
+}
+
+function renderVoicePackBubble(p) {
+  var isOutgoing = p.user_id === myId;
+  var side = isOutgoing ? 'outgoing' : 'incoming';
+  var user = allUsers.find(function(u) { return u.id === p.user_id; });
+  var name = user ? user.name : 'User';
+  var time = p.created_at ? getTimeAgo(new Date(p.created_at + 'Z')) : '';
+  var dur = formatDuration(p.duration || 0);
+  var audioUrl = p.audio_url || '';
+  var reacted = {};
+  try { reacted = JSON.parse(p.reactions) || {}; } catch(e) {}
+  var myReactions = [];
+  for (var emoji in reacted) {
+    if (reacted[emoji].includes(myId)) myReactions.push(emoji);
+  }
+  var reactionsHtml = '';
+  var hasReactions = false;
+  for (var emoji in reacted) {
+    if (reacted[emoji].length > 0) {
+      hasReactions = true;
+      var activeClass = myReactions.includes(emoji) ? ' active' : '';
+      reactionsHtml += '<span class="voice-reaction' + activeClass + '" onclick="voiceToggleReaction(\'' + p.id + '\',\'' + emoji + '\')">' + emoji + ' <span class="vr-count">' + reacted[emoji].length + '</span></span>';
+    }
+  }
+  if (hasReactions) reactionsHtml = '<div class="voice-pack-reactions">' + reactionsHtml + '</div>';
+
+  var replyHtml = '';
+  if (p.reply_to) {
+    var repliedPack = voiceConvData.find(function(v) { return v.id === p.reply_to; });
+    var repliedName = '';
+    if (repliedPack) {
+      var repliedUser = allUsers.find(function(u) { return u.id === repliedPack.user_id; });
+      repliedName = repliedUser ? repliedUser.name : 'User';
+    }
+    replyHtml = '<div class="voice-pack-reply-ref"><span class="vpr-icon">↩</span><span class="vpr-label">' + escapeHtml(repliedName) + '</span></div>';
+  }
+
+  return '<div class="voice-pack-bubble ' + side + '">' +
+    '<div class="voice-pack-header">' +
+      '<span class="vpb-name">' + escapeHtml(name) + '</span>' +
+      '<span class="vpb-time">' + time + '</span>' +
+    '</div>' +
+    '<div class="voice-pack-body">' +
+      replyHtml +
+      '<div class="voice-pack-player">' +
+        '<button class="voice-pack-play" onclick="voiceConvPlay(this,\'' + audioUrl + '\')">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>' +
+        '</button>' +
+        '<div class="voice-pack-bar" onclick="voiceConvSeek(event,this)" data-dur="' + (p.duration || 0) + '">' +
+          '<div class="voice-pack-bar-fill"></div>' +
+        '</div>' +
+        '<span class="voice-pack-dur">' + dur + '</span>' +
+      '</div>' +
+      reactionsHtml +
+    '</div>' +
+    '<div class="voice-pack-actions">' +
+      '<button class="voice-pack-action" onclick="replyToVoiceMsg(\'' + p.id + '\',\'' + escapeHtmlAttr(name) + '\')">💬 Reply</button>' +
+      '<button class="voice-pack-action" onclick="showEmojiPicker(event,\'' + p.id + '\')">😊 React</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function voiceConvPlay(btn, url) {
+  var bubble = btn.closest('.voice-pack-bubble');
+  if (!bubble) return;
+  var bar = bubble.querySelector('.voice-pack-bar');
+  var fill = bubble.querySelector('.voice-pack-bar-fill');
+  var dur = parseFloat(bar ? bar.dataset.dur : 0) || 0;
+  var playSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
+  var pauseSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+  if (voiceConvAudio && voiceConvPlayEl === btn && !voiceConvAudio.paused) {
+    voiceConvAudio.pause();
+    btn.classList.remove('playing');
+    btn.innerHTML = playSvg;
+    if (voiceConvInterval) clearInterval(voiceConvInterval);
+    return;
+  }
+  if (voiceConvAudio && voiceConvPlayEl === btn && voiceConvAudio.paused) {
+    voiceConvAudio.play();
+    btn.classList.add('playing');
+    btn.innerHTML = pauseSvg;
+    if (voiceConvInterval) clearInterval(voiceConvInterval);
+    voiceConvInterval = setInterval(function() {
+      if (voiceConvAudio && !voiceConvAudio.paused) {
+        fill.style.width = Math.min((voiceConvAudio.currentTime / Math.max(dur,1)) * 100, 100) + '%';
+      }
+    }, 150);
+    return;
+  }
+  if (voiceConvAudio) {
+    voiceConvAudio.pause();
+    if (voiceConvInterval) clearInterval(voiceConvInterval);
+    if (voiceConvPlayEl) {
+      voiceConvPlayEl.classList.remove('playing');
+      voiceConvPlayEl.innerHTML = playSvg;
+      var pf = voiceConvPlayEl.closest('.voice-pack-bubble').querySelector('.voice-pack-bar-fill');
+      if (pf) pf.style.width = '0%';
+    }
+  }
+  voiceConvAudio = new Audio(url);
+  voiceConvPlayEl = btn;
+  voiceConvAudio.onended = function() {
+    btn.classList.remove('playing');
+    btn.innerHTML = playSvg;
+    fill.style.width = '0%';
+    if (voiceConvInterval) clearInterval(voiceConvInterval);
+    voiceConvAudio = null;
+    voiceConvPlayEl = null;
+  };
+  voiceConvAudio.play();
+  btn.classList.add('playing');
+  btn.innerHTML = pauseSvg;
+  if (voiceConvInterval) clearInterval(voiceConvInterval);
+  voiceConvInterval = setInterval(function() {
+    if (voiceConvAudio && !voiceConvAudio.paused) {
+      fill.style.width = Math.min((voiceConvAudio.currentTime / Math.max(dur,1)) * 100, 100) + '%';
+    }
+  }, 150);
+}
+
+function voiceConvSeek(event, bar) {
+  if (!voiceConvAudio || !voiceConvPlayEl) return;
+  var bubble = voiceConvPlayEl.closest('.voice-pack-bubble');
+  if (!bubble || bubble.querySelector('.voice-pack-bar') !== bar) return;
+  var rect = bar.getBoundingClientRect();
+  var x = event.clientX - rect.left;
+  var pct = Math.max(0, Math.min(1, x / rect.width));
+  var dur = parseFloat(bar.dataset.dur) || 0;
+  voiceConvAudio.currentTime = pct * dur;
+}
+
+function replyToVoiceMsg(id, name) {
+  voiceReplyToId = id;
+  voiceReplyToName = name;
+  var bar = document.getElementById('voiceReplyBar');
+  if (bar) {
+    bar.style.display = 'flex';
+    document.getElementById('voiceReplyText').textContent = 'Reply to ' + name;
+  }
+}
+
+function cancelVoiceReply() {
+  voiceReplyToId = null;
+  voiceReplyToName = '';
+  var bar = document.getElementById('voiceReplyBar');
+  if (bar) bar.style.display = 'none';
+}
+
+function startVoiceConvRec() {
   if (!myId) return;
-  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
     voiceRecChunks = [];
-    voiceRecBlob = null;
-    voiceRecDuration = 0;
-    const opts = { mimeType: 'audio/webm' };
+    voiceRecStartTime = Date.now();
+    var opts = { mimeType: 'audio/webm' };
     try {
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) opts.mimeType = 'audio/webm;codecs=opus';
       opts.audioBitsPerSecond = 24000;
     } catch(e) {}
     voiceRecMediaRecorder = new MediaRecorder(stream, opts);
-    voiceRecMediaRecorder.ondataavailable = e => { if (e.data.size > 0) voiceRecChunks.push(e.data); };
-    voiceRecMediaRecorder.onstop = () => {
-      stream.getTracks().forEach(t => t.stop());
-      voiceRecDuration = Math.floor((Date.now() - voiceRecStartTime) / 1000);
-      voiceRecBlob = new Blob(voiceRecChunks, { type: 'audio/webm' });
-      setRecordingStatus(false);
-      showVoicePreview();
+    voiceRecMediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) voiceRecChunks.push(e.data); };
+    voiceRecMediaRecorder.onstop = function() {
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      var duration = Math.floor((Date.now() - voiceRecStartTime) / 1000);
+      var blob = new Blob(voiceRecChunks, { type: 'audio/webm' });
+      document.getElementById('voiceMicBtn').style.display = 'flex';
+      document.getElementById('voiceConvRec').style.display = 'none';
+      uploadVoicePack(blob, duration);
     };
     voiceRecMediaRecorder.start();
-    voiceRecStartTime = Date.now();
-    setRecordingStatus(true);
-    hideVoiceSheet('voicePreviewUI');
-    showVoiceSheet('voiceRecordingUI');
-    document.getElementById('voiceFabBtn').style.display = 'none';
-    startVoiceRecTimer();
-  }).catch(() => {
-    alert('Microphone access is required.');
+    document.getElementById('voiceMicBtn').style.display = 'none';
+    document.getElementById('voiceConvRec').style.display = 'flex';
+    document.getElementById('voiceConvTimer').textContent = '0:00';
+    if (voiceRecTimer) clearInterval(voiceRecTimer);
+    voiceRecTimer = setInterval(function() {
+      var sec = Math.floor((Date.now() - voiceRecStartTime) / 1000);
+      if (sec >= 60) stopVoiceConvRec();
+      document.getElementById('voiceConvTimer').textContent = formatDuration(sec);
+    }, 200);
+  }).catch(function() {
+    alert('Microphone access is required to record voice packs.');
   });
 }
 
-function startVoiceRecTimer() {
-  const el = document.getElementById('voiceRecTimer');
-  if (voiceRecTimer) clearInterval(voiceRecTimer);
-  voiceRecTimer = setInterval(() => {
-    const sec = Math.floor((Date.now() - voiceRecStartTime) / 1000);
-    if (sec >= 60) stopVoiceRec();
-    el.textContent = formatDuration(sec);
-  }, 200);
-}
-
-function stopVoiceRec() {
+function stopVoiceConvRec() {
   if (voiceRecMediaRecorder && voiceRecMediaRecorder.state === 'recording') {
     voiceRecMediaRecorder.stop();
     if (voiceRecTimer) clearInterval(voiceRecTimer);
-    hideVoiceSheet('voiceRecordingUI');
   }
 }
 
-function cancelVoiceRec() {
+function cancelVoiceConvRec() {
   if (voiceRecMediaRecorder && voiceRecMediaRecorder.state === 'recording') {
-    voiceRecMediaRecorder.stream.getTracks().forEach(t => t.stop());
+    voiceRecMediaRecorder.stream.getTracks().forEach(function(t) { t.stop(); });
     voiceRecMediaRecorder = null;
   }
   if (voiceRecTimer) clearInterval(voiceRecTimer);
   voiceRecChunks = [];
-  voiceRecBlob = null;
-  setRecordingStatus(false);
-  hideVoiceSheet('voiceRecordingUI');
-  document.getElementById('voiceFabBtn').style.display = 'flex';
+  document.getElementById('voiceMicBtn').style.display = 'flex';
+  document.getElementById('voiceConvRec').style.display = 'none';
 }
 
-function showVoicePreview() {
-  showVoiceSheet('voicePreviewUI');
-  hideVoiceSheet('voiceRecordingUI');
-  document.getElementById('voiceFabBtn').style.display = 'none';
-  document.getElementById('voicePreviewDur').textContent = formatDuration(voiceRecDuration);
-  document.getElementById('voiceUploadProgress').style.display = 'none';
-  document.getElementById('voiceUploadBtn').disabled = false;
-}
-
-function toggleVoicePreview() {
-  const btn = document.getElementById('voicePreviewPlay');
-  if (!voiceRecBlob) return;
-  if (voiceRecPreviewAudio && !voiceRecPreviewAudio.paused) {
-    voiceRecPreviewAudio.pause();
-    btn.classList.remove('playing');
-    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
-    return;
-  }
-  if (!voiceRecPreviewAudio) {
-    voiceRecPreviewAudio = new Audio(URL.createObjectURL(voiceRecBlob));
-    voiceRecPreviewAudio.onended = () => {
-      btn.classList.remove('playing');
-      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
-      voiceRecPreviewAudio = null;
-    };
-  }
-  voiceRecPreviewAudio.play();
-  btn.classList.add('playing');
-  btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-}
-
-function deleteVoicePreview() {
-  if (voiceRecPreviewAudio) { voiceRecPreviewAudio.pause(); voiceRecPreviewAudio = null; }
-  voiceRecBlob = null;
-  voiceRecDuration = 0;
-  voiceRecChunks = [];
-  hideVoiceSheet('voicePreviewUI');
-  document.getElementById('voiceFabBtn').style.display = 'flex';
-  document.getElementById('voicePreviewPlay').classList.remove('playing');
-}
-
-function reRecordVoice() {
-  deleteVoicePreview();
-  startVoiceRec();
-}
-
-function uploadVoiceRecording() {
-  if (!voiceRecBlob || !myId) return;
-  if (voiceRecPreviewAudio) { voiceRecPreviewAudio.pause(); voiceRecPreviewAudio = null; }
-  const progress = document.getElementById('voiceUploadProgress');
-  const fill = document.getElementById('voiceProgressFill');
-  const label = document.getElementById('voiceProgressLabel');
-  const btn = document.getElementById('voiceUploadBtn');
-  progress.style.display = 'flex';
-  btn.disabled = true;
-  fill.style.width = '0%';
-  label.textContent = 'Uploading...';
-
-  const formData = new FormData();
-  formData.append('audio', voiceRecBlob, 'recording.webm');
+function uploadVoicePack(blob, duration) {
+  var formData = new FormData();
+  formData.append('audio', blob, 'voice.webm');
   formData.append('userId', myId);
-  formData.append('duration', voiceRecDuration);
-
-  const xhr = new XMLHttpRequest();
+  formData.append('duration', duration);
+  if (voiceReplyToId) {
+    formData.append('reply_to', voiceReplyToId);
+  }
+  var xhr = new XMLHttpRequest();
   xhr.open('POST', VOICE_API + '/api/voices/upload');
-  xhr.upload.onprogress = e => {
-    if (e.lengthComputable) {
-      const pct = Math.round((e.loaded / e.total) * 100);
-      fill.style.width = pct + '%';
-      label.textContent = 'Uploading... ' + pct + '%';
-    }
-  };
-  xhr.onload = () => {
+  xhr.onload = function() {
     if (xhr.status === 200) {
-      label.textContent = 'Upload complete!';
-      fill.style.width = '100%';
-      voiceRecBlob = null;
-      voiceRecChunks = [];
-      voiceRecDuration = 0;
-      setTimeout(() => {
-        hideVoiceSheet('voicePreviewUI');
-        document.getElementById('voiceFabBtn').style.display = 'flex';
-        loadVoiceRecordings();
-      }, 800);
+      var resp;
+      try { resp = JSON.parse(xhr.responseText); } catch(e) { return; }
+      cancelVoiceReply();
+      fetch(VOICE_API + '/api/voices/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recordingId: resp.id, senderId: myId, receiverId: voiceConvPartnerId })
+      }).then(function() { loadVoiceConvMsgs(); }).catch(function() { loadVoiceConvMsgs(); });
     } else {
-      label.textContent = 'Upload failed. Try again.';
-      btn.disabled = false;
+      alert('Failed to upload voice pack.');
     }
   };
-  xhr.onerror = () => {
-    label.textContent = 'Network error. Try again.';
-    btn.disabled = false;
+  xhr.onerror = function() {
+    alert('Network error. Try again.');
   };
   xhr.send(formData);
 }
 
-const VOICE_EMPTY_HTML = '<div class="voice-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ios-gray3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><div>No recordings yet</div><div style="font-size:13px;margin-top:4px;">Tap the mic button below to record</div></div>';
+var voiceReactingId = null;
 
-let _voiceLoadTimer = null;
-async function loadVoiceRecordings() {
-  if (_voiceLoadTimer) clearTimeout(_voiceLoadTimer);
-  return new Promise(resolve => {
-    _voiceLoadTimer = setTimeout(async () => {
-      const list = document.getElementById('voiceList');
-      voiceRecData = {};
-      try {
-        const res = await fetch(VOICE_API + '/api/voices/list?userId=' + encodeURIComponent(myId) + '&t=' + Date.now(), { cache: 'no-store' });
-        if (!res.ok) throw new Error('Server error');
-        const recordings = await res.json();
-        if (recordings.length === 0) {
-          list.innerHTML = VOICE_EMPTY_HTML;
-          resolve();
-          return;
-        }
-        list.innerHTML = recordings.map(r => {
-          const user = (typeof allUsers !== 'undefined' && allUsers.find) ? allUsers.find(u => u.id === r.user_id) : null;
-          const name = user ? user.name : 'User';
-          const initial = name.charAt(0).toUpperCase();
-          const avatar = (user && user.photoURL) ? '<img src="' + user.photoURL + '">' : initial;
-          const isOwner = r.user_id === myId;
-          const timeAgo = r.created_at ? getTimeAgo(new Date(r.created_at + 'Z')) : '';
-          const listened = getListenedVoices().includes(r.id);
-          voiceRecData[r.id] = r;
-          return '<div class="voice-card' + (!listened ? ' is-recent' : '') + '" data-id="' + r.id + '">' +
-            '<div class="voice-card-header">' +
-              '<div class="voice-card-avatar">' + avatar + '</div>' +
-              '<div class="voice-card-info">' +
-                '<div class="voice-card-name">' + escapeHtml(name) + (!listened ? '<span class="voice-new-badge">NEW</span>' : '') + '</div>' +
-                '<div class="voice-card-time">' + timeAgo + '</div>' +
-              '</div>' +
-              (isOwner ? '<button class="voice-card-delete" onclick="sendVoiceToUser(\'' + r.id + '\')" title="Send to user" style="color:var(--ios-blue);margin-right:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></button>' : '') +
-              (isOwner ? '<button class="voice-card-delete" onclick="deleteVoiceRecording(\'' + r.id + '\')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' : '') +
-            '</div>' +
-            '<div class="voice-card-player">' +
-              '<button class="voice-card-play" onclick="playVoiceCard(this, \'' + (r.audio_url || '') + '\')">' +
-                '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>' +
-              '</button>' +
-              '<div class="voice-card-bar" onclick="seekVoiceCard(event, this)" data-dur="' + (r.duration || 0) + '">' +
-                '<div class="voice-card-bar-fill"></div>' +
-              '</div>' +
-              '<span class="voice-card-dur">' + formatDuration(r.duration || 0) + '</span>' +
-            '</div>' +
-          '</div>';
-        }).join('');
-        resolve();
-      } catch (err) {
-        if (list.querySelector('.voice-card')) {
-          resolve();
-          return;
-        }
-        list.innerHTML = '<div class="voice-empty">Failed to load. Tap mic to try again.</div>';
-        resolve();
-      }
-    }, 300);
-  });
+function showEmojiPicker(event, id) {
+  event.stopPropagation();
+  voiceReactingId = id;
+  var picker = document.getElementById('voiceEmojiPicker');
+  picker.style.display = 'block';
+  setTimeout(function() { document.addEventListener('click', hideEmojiPicker, { once: true }); }, 0);
 }
 
-function playVoiceCard(btn, url) {
-  const card = btn.closest('.voice-card');
-  const bar = card.querySelector('.voice-card-bar');
-  const fill = card.querySelector('.voice-card-bar-fill');
-  const dur = parseFloat(bar.dataset.dur) || 0;
-  const recId = card.dataset.id;
-  if (voiceCardAudio && voiceCardPlayEl === btn && !voiceCardAudio.paused) {
-    voiceCardAudio.pause();
-    btn.classList.remove('playing');
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
-    if (voiceCardInterval) clearInterval(voiceCardInterval);
-    return;
-  }
-  if (voiceCardAudio && voiceCardPlayEl === btn && voiceCardAudio.paused) {
-    voiceCardAudio.play();
-    btn.classList.add('playing');
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    startVoiceCardProgress(bar, fill, dur);
-    return;
-  }
-  if (voiceCardAudio) {
-    voiceCardAudio.pause();
-    if (voiceCardInterval) clearInterval(voiceCardInterval);
-    if (voiceCardPlayEl) {
-      voiceCardPlayEl.classList.remove('playing');
-      voiceCardPlayEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
-    }
-    const prevFill = voiceCardPlayEl ? voiceCardPlayEl.closest('.voice-card').querySelector('.voice-card-bar-fill') : null;
-    if (prevFill) prevFill.style.width = '0%';
-  }
-  voiceCardAudio = new Audio(url);
-  voiceCardPlayEl = btn;
-  voiceCardAudio.onended = () => {
-    btn.classList.remove('playing');
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
-    fill.style.width = '0%';
-    if (voiceCardInterval) clearInterval(voiceCardInterval);
-    voiceCardAudio = null;
-    voiceCardPlayEl = null;
-  };
-  voiceCardAudio.play();
-  markVoiceListened(recId);
-  btn.classList.add('playing');
-  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-  startVoiceCardProgress(bar, fill, dur);
+function hideEmojiPicker() {
+  var picker = document.getElementById('voiceEmojiPicker');
+  picker.style.display = 'none';
+  voiceReactingId = null;
 }
 
-function startVoiceCardProgress(bar, fill, dur) {
-  if (voiceCardInterval) clearInterval(voiceCardInterval);
-  voiceCardInterval = setInterval(() => {
-    if (voiceCardAudio && !voiceCardAudio.paused) {
-      const pct = dur > 0 ? (voiceCardAudio.currentTime / dur) * 100 : 0;
-      fill.style.width = Math.min(pct, 100) + '%';
-    }
-  }, 150);
+function pickReaction(emoji) {
+  if (voiceReactingId) voiceToggleReaction(voiceReactingId, emoji);
+  hideEmojiPicker();
 }
 
-function seekVoiceCard(event, bar) {
-  if (!voiceCardAudio || voiceCardPlayEl.closest('.voice-card').querySelector('.voice-card-bar') !== bar) return;
-  const rect = bar.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const pct = Math.max(0, Math.min(1, x / rect.width));
-  const dur = parseFloat(bar.dataset.dur) || 0;
-  voiceCardAudio.currentTime = pct * dur;
-}
-
-async function deleteVoiceRecording(id) {
-  if (!confirm('Delete this recording?')) return;
+async function voiceToggleReaction(recordingId, emoji) {
   try {
-    await fetch(VOICE_API + '/api/voices/' + id, { method: 'DELETE' });
-    loadVoiceRecordings();
-  } catch (err) {
-    alert('Failed to delete.');
-  }
-}
-
-function sendVoiceToUser(recordingId) {
-  const rec = voiceRecData[recordingId];
-  if (!rec) return;
-  voicePackSendingAudioUrl = rec.audio_url || '';
-  voicePackSendingDuration = rec.duration || 0;
-  voicePackSendingId = recordingId;
-  showVoiceUserSelect();
-}
-
-function showVoiceUserSelect() {
-  const list = document.getElementById('voiceUserSelectList');
-  if (allUsers.length === 0) {
-    list.innerHTML = '<div style="text-align:center;color:var(--ios-gray);padding:20px;">No users found</div>';
-  } else {
-    list.innerHTML = allUsers.map(function(user) {
-      var initial = (user.name || 'U').charAt(0).toUpperCase();
-      var avatar = user.photoURL ? '<img src="' + user.photoURL + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">' : '<div style="width:36px;height:36px;border-radius:50%;background:var(--ios-gray5);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:var(--ios-gray);">' + initial + '</div>';
-      return '<div onclick="selectVoicePackRecipient(\'' + user.id + '\')" style="display:flex;align-items:center;gap:12px;padding:10px 4px;cursor:pointer;border-bottom:0.5px solid var(--ios-separator);">' + avatar + '<div style="font-size:15px;font-weight:500;">' + escapeHtml(user.name) + '</div></div>';
-    }).join('');
-  }
-  showVoiceSheet('voiceUserSelectUI');
-}
-
-function hideVoiceUserSelect() {
-  hideVoiceSheet('voiceUserSelectUI');
-  voicePackSendingAudioUrl = null;
-  voicePackSendingDuration = 0;
-  voicePackSendingId = null;
-}
-
-async function selectVoicePackRecipient(userId) {
-  if (!voicePackSendingId || !myId) return;
-  var sendId = voicePackSendingId;
-  hideVoiceUserSelect();
-
-  var user = allUsers.find(function(u) { return u.id === userId; });
-  var recipientName = user ? user.name : 'User';
-
-  showUploading('Sending voice pack...');
-
-  try {
-    var sendRes = await fetch(VOICE_API + '/api/voices/send', {
+    var res = await fetch(VOICE_API + '/api/voices/' + recordingId + '/react', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        recordingId: sendId,
-        senderId: myId,
-        receiverId: userId
-      })
+      body: JSON.stringify({ userId: myId, emoji: emoji })
     });
-
-    var sendData = await sendRes.json();
-
-    if (sendData.success) {
-      showToast('Sent', 'Voice pack sent to ' + recipientName);
-      loadVoiceRecordings();
-    } else {
-      throw new Error('Send failed');
-    }
+    if (res.ok) loadVoiceConvMsgs();
   } catch (err) {
-    console.error('Send voice pack error:', err);
-    alert('Failed to send voice pack.');
+    console.error('React error:', err);
   }
+}
 
-  hideUploading();
-  voicePackSendingAudioUrl = null;
-  voicePackSendingDuration = 0;
-  voicePackSendingId = null;
+function deleteVoiceRecording(id) {
+  // kept as no-op stub for any lingering inline onclick references
 }
 
 function getTimeAgo(date) {
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  var seconds = Math.floor((Date.now() - date.getTime()) / 1000);
   if (seconds < 60) return 'Just now';
-  const minutes = Math.floor(seconds / 60);
+  var minutes = Math.floor(seconds / 60);
   if (minutes < 60) return minutes + 'm ago';
-  const hours = Math.floor(minutes / 60);
+  var hours = Math.floor(minutes / 60);
   if (hours < 24) return hours + 'h ago';
-  const days = Math.floor(hours / 24);
+  var days = Math.floor(hours / 24);
   if (days < 7) return days + 'd ago';
   return date.toLocaleDateString();
-}
-
-function getListenedVoices() {
-  try { return JSON.parse(localStorage.getItem('listenedVoices') || '[]'); } catch(e) { return []; }
-}
-
-function markVoiceListened(id) {
-  const listened = getListenedVoices();
-  if (!listened.includes(id)) {
-    listened.push(id);
-    localStorage.setItem('listenedVoices', JSON.stringify(listened));
-  }
-  const card = document.querySelector('.voice-card[data-id="' + id + '"]');
-  if (card) {
-    card.classList.remove('is-recent');
-    const badge = card.querySelector('.voice-new-badge');
-    if (badge) badge.remove();
-  }
-}
-
-async function migrateToJasmine() {
-  try {
-    var jasmineUser = allUsers.find(function(u) { return (u.name || '').toUpperCase() === 'JASMINE'; });
-    if (!jasmineUser) {
-      alert('Jasmine user not found!');
-      return;
-    }
-
-    var confirmSend = confirm('Send all your recordings to ' + jasmineUser.name + '?');
-    if (!confirmSend) return;
-
-    showUploading('Sending all recordings to Jasmine...');
-
-    var res = await fetch(VOICE_API + '/api/voices/list?userId=' + encodeURIComponent(myId) + '&t=' + Date.now(), { cache: 'no-store' });
-    var recordings = await res.json();
-    var myRecordings = recordings.filter(function(r) { return r.user_id === myId && !r.receiver_id; });
-
-    var sent = 0;
-    for (var i = 0; i < myRecordings.length; i++) {
-      try {
-        var sendRes = await fetch(VOICE_API + '/api/voices/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recordingId: myRecordings[i].id,
-            senderId: myId,
-            receiverId: jasmineUser.id
-          })
-        });
-        var sendData = await sendRes.json();
-        if (sendData.success) sent++;
-      } catch (e) {}
-    }
-
-    hideUploading();
-    alert('Done! Sent ' + sent + ' recordings to Jasmine.');
-    loadVoiceRecordings();
-  } catch (err) {
-    hideUploading();
-    alert('Migration failed: ' + err.message);
-  }
 }
 
