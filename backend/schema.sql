@@ -58,3 +58,8 @@ DO $$ BEGIN
   ALTER TABLE voice_recordings ADD COLUMN reactions TEXT DEFAULT '{}';
 EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
+
+DO $$ BEGIN
+  ALTER TABLE voice_recordings ADD COLUMN seen BOOLEAN DEFAULT FALSE;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;

@@ -542,6 +542,7 @@ function selectUser(userId) {
   listenTyping();
   listenRecording();
   renderBroadcastMessages();
+  setTimeout(markMessagesAsSeen, 500);
 }
 
 function goBack() {
@@ -652,6 +653,10 @@ function listenMessages() {
             loadedMsgIds.add(change.doc.id);
             const data = change.doc.data();
             const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
+            // Mark as seen if it's from the other user
+            if (msg.from !== myId && !msg.seen) {
+              db.collection('messages').doc(msg.id).update({ seen: true, seen_at: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
+            }
             appendMessageToArea(msg, typingEl, true);
             const a = document.getElementById('messagesArea');
             if (a && a.scrollHeight - a.scrollTop - a.clientHeight < 200) {
@@ -764,6 +769,9 @@ async function loadMoreMessages() {
             loadedMsgIds.add(change.doc.id);
             const data = change.doc.data();
             const msg = { id: change.doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at };
+            if (msg.from !== myId && !msg.seen) {
+              db.collection('messages').doc(msg.id).update({ seen: true, seen_at: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
+            }
             appendMessageToArea(msg, loadMoreDiv, true);
             const a = document.getElementById('messagesArea');
             if (a && a.scrollHeight - a.scrollTop - a.clientHeight < 200) {
@@ -858,7 +866,8 @@ function createMessageElement(msg, prevMsg, nextMsg) {
   // Time only on last message in group
   const showTime = !nextIsSame;
   if (showTime) {
-    bubbleWrap.innerHTML += '<div class="message-time">' + time + '</div>';
+    var seenHtml = (isOwn && msg.seen) ? ' <span style="color:var(--ios-green);font-size:11px">✓✓</span>' : '';
+    bubbleWrap.innerHTML += '<div class="message-time">' + time + seenHtml + '</div>';
   }
 
   wrapper.appendChild(bubbleWrap);
@@ -946,7 +955,8 @@ function appendMessageToArea(msg, insertBefore, animate) {
   }
 
   // Real-time messages always show time (last in group)
-  bubbleWrap.innerHTML += '<div class="message-time">' + time + '</div>';
+  var seenHtml = (isOwn && msg.seen) ? ' <span style="color:var(--ios-green);font-size:11px">✓✓</span>' : '';
+  bubbleWrap.innerHTML += '<div class="message-time">' + time + seenHtml + '</div>';
 
   wrapper.appendChild(bubbleWrap);
   if (!msg.deleted) {
@@ -1002,7 +1012,8 @@ function updateMessageInDOM(msg) {
     }
   }
 
-  content += '<div class="message-time">' + time + '</div>';
+  var seenHtml = (isOwn && msg.seen) ? ' <span style="color:var(--ios-green);font-size:11px">✓✓</span>' : '';
+  content += '<div class="message-time">' + time + seenHtml + '</div>';
   wrapper.innerHTML = content;
   if (!msg.deleted) {
     wrapper.onclick = function() { showActionPopup(msg.id, this, isOwn); };
@@ -1025,7 +1036,8 @@ async function sendMessage() {
     to: selectedUserId,
     created_at: firebase.firestore.FieldValue.serverTimestamp(),
     edited: false,
-    deleted: false
+    deleted: false,
+    seen: false
   };
 
   if (text) msgData.message = text;
@@ -1201,13 +1213,53 @@ function listenRecording() {
   });
 }
 
-function setRecordingStatus(isRecording) {
-  if (!selectedUserId) return;
-  const convId = [myId, selectedUserId].sort().join('_');
+function voiceListenRecording() {
+  if (!voiceConvPartnerId) return;
+  if (voiceUnsubRecording) voiceUnsubRecording();
+  var convId = [myId, voiceConvPartnerId].sort().join('_');
+  voiceUnsubRecording = db.collection('recording').doc(convId).onSnapshot(function(doc) {
+    var el = document.getElementById('voiceRecordingIndicator');
+    if (!el) return;
+    if (doc.exists && doc.data()[voiceConvPartnerId]) {
+      el.classList.add('show');
+      scrollVoiceConvDown();
+    } else {
+      el.classList.remove('show');
+    }
+  });
+}
+
+function setRecordingStatus(isRecording, partnerId) {
+  var pid = partnerId || selectedUserId;
+  if (!pid) return;
+  var convId = [myId, pid].sort().join('_');
   if (isRecording) {
     db.collection('recording').doc(convId).set({ [myId]: true }, { merge: true });
   } else {
     db.collection('recording').doc(convId).set({ [myId]: false }, { merge: true });
+  }
+}
+
+// ==================== SEEN / READ RECEIPTS ====================
+async function markMessagesAsSeen() {
+  if (!selectedUserId) return;
+  const convId = [myId, selectedUserId].sort().join('_');
+  try {
+    const snapshot = await db.collection('messages')
+      .where('conversation', '==', convId)
+      .get();
+    const batch = db.batch();
+    let count = 0;
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (!data.seen) {
+        batch.update(doc.ref, { seen: true, seen_at: firebase.firestore.FieldValue.serverTimestamp() });
+        count++;
+      }
+    });
+    if (count > 0) await batch.commit();
+  } catch (err) {
+    console.error('markMessagesAsSeen error:', err);
   }
 }
 
@@ -2081,7 +2133,7 @@ async function sendImage(input) {
     const msgData = {
       conversation: convId, from: myId, to: selectedUserId,
       created_at: firebase.firestore.FieldValue.serverTimestamp(),
-      edited: false, deleted: false,
+      edited: false, deleted: false, seen: false,
       image: { url: SERVER_URL + data.url }
     };
     if (replyToMsg) {
@@ -2114,6 +2166,7 @@ let voiceConvInterval = null;
 let voiceConvPollTimer = null;
 let voiceReplyToId = null;
 let voiceReplyToName = '';
+let voiceUnsubRecording = null;
 
 let voiceRecMediaRecorder = null;
 let voiceRecChunks = [];
@@ -2167,6 +2220,13 @@ function openVoiceConv(userId, userName) {
   loadVoiceConvMsgs();
   if (voiceConvPollTimer) clearInterval(voiceConvPollTimer);
   voiceConvPollTimer = setInterval(loadVoiceConvMsgs, 3000);
+  voiceListenRecording();
+  // Mark voice packs as seen
+  fetch(VOICE_API + '/api/voices/mark-seen', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ viewerId: myId, partnerId: userId })
+  }).catch(function() {});
   document.getElementById('voiceConvMsgs').onclick = function(e) {
     var bubble = e.target.closest('.voice-pack-bubble');
     if (!bubble || !voiceSelectMode) return;
@@ -2179,6 +2239,7 @@ function closeVoiceConv() {
   if (voiceConvAudio) { voiceConvAudio.pause(); voiceConvAudio = null; }
   if (voiceConvInterval) clearInterval(voiceConvInterval);
   if (voiceConvPollTimer) clearInterval(voiceConvPollTimer);
+  if (voiceUnsubRecording) { voiceUnsubRecording(); voiceUnsubRecording = null; }
   voiceConvPlayEl = null;
   voiceConvPartnerId = null;
   voiceConvData = [];
@@ -2272,7 +2333,7 @@ function renderVoicePackBubble(p) {
     '</div>' +
     '<div class="voice-pack-header">' +
       '<span class="vpb-name">' + escapeHtml(name) + '</span>' +
-      '<span class="vpb-time">' + time + '</span>' +
+      '<span class="vpb-time">' + time + (isOutgoing && p.seen ? ' <span style="color:var(--ios-green);font-size:10px">✓✓</span>' : '') + '</span>' +
     '</div>' +
     '<div class="voice-pack-body">' +
       replyHtml +
@@ -2399,6 +2460,7 @@ function startVoiceConvRec() {
     voiceRecMediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) voiceRecChunks.push(e.data); };
     voiceRecMediaRecorder.onstop = function() {
       stream.getTracks().forEach(function(t) { t.stop(); });
+      setRecordingStatus(false, voiceConvPartnerId);
       voiceConvPreviewDur = Math.floor((Date.now() - voiceRecStartTime) / 1000);
       voiceConvPreviewBlob = new Blob(voiceRecChunks, { type: 'audio/webm' });
       document.getElementById('voiceMicBtn').style.display = 'none';
@@ -2406,6 +2468,7 @@ function startVoiceConvRec() {
       showVoiceConvPreview();
     };
     voiceRecMediaRecorder.start();
+    setRecordingStatus(true, voiceConvPartnerId);
     document.getElementById('voiceMicBtn').style.display = 'none';
     document.getElementById('voiceConvRec').style.display = 'flex';
     document.getElementById('voiceConvTimer').textContent = '0:00';
@@ -2531,6 +2594,7 @@ function cancelVoiceConvRec() {
     voiceRecMediaRecorder = null;
   }
   if (voiceRecTimer) clearInterval(voiceRecTimer);
+  setRecordingStatus(false, voiceConvPartnerId);
   voiceRecChunks = [];
   document.getElementById('voiceMicBtn').style.display = 'flex';
   document.getElementById('voiceConvRec').style.display = 'none';

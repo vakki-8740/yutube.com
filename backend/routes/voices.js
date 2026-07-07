@@ -48,7 +48,7 @@ router.get('/list', async (req, res) => {
     let result;
     if (userId) {
       result = await pool.query(
-        'SELECT id, user_id, audio_data, duration, file_size, receiver_id, reply_to, reactions, created_at FROM voice_recordings WHERE user_id = $1 OR receiver_id = $1 ORDER BY created_at DESC',
+        'SELECT id, user_id, audio_data, duration, file_size, receiver_id, reply_to, reactions, seen, created_at FROM voice_recordings WHERE user_id = $1 OR receiver_id = $1 ORDER BY created_at DESC',
         [userId]
       );
     } else {
@@ -133,6 +133,23 @@ router.post('/send', async (req, res) => {
   }
 });
 
+router.post('/mark-seen', async (req, res) => {
+  try {
+    const { viewerId, partnerId } = req.body;
+    if (!viewerId || !partnerId) {
+      return res.status(400).json({ error: 'viewerId and partnerId are required' });
+    }
+    const result = await pool.query(
+      'UPDATE voice_recordings SET seen = TRUE WHERE user_id = $1 AND receiver_id = $2 AND (seen IS NULL OR seen = FALSE) RETURNING id',
+      [partnerId, viewerId]
+    );
+    res.json({ success: true, updated: result.rowCount });
+  } catch (err) {
+    console.error('Mark seen error:', err);
+    res.status(500).json({ error: 'Failed to mark as seen' });
+  }
+});
+
 router.post('/send-bulk', async (req, res) => {
   try {
     const { senderId, receiverId } = req.body;
@@ -154,7 +171,7 @@ router.get('/conversation/:user1/:user2', async (req, res) => {
   try {
     const { user1, user2 } = req.params;
     const result = await pool.query(
-      'SELECT id, user_id, audio_data, duration, file_size, receiver_id, reply_to, reactions, created_at FROM voice_recordings WHERE (user_id = $1 AND receiver_id = $2) OR (user_id = $2 AND receiver_id = $1) ORDER BY created_at ASC',
+      'SELECT id, user_id, audio_data, duration, file_size, receiver_id, reply_to, reactions, seen, created_at FROM voice_recordings WHERE (user_id = $1 AND receiver_id = $2) OR (user_id = $2 AND receiver_id = $1) ORDER BY created_at ASC',
       [user1, user2]
     );
     const rows = result.rows.map(r => {
