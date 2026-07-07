@@ -867,9 +867,9 @@ function getMessageGroupClass(prevMsg, nextMsg, msg) {
   return 'msg-single';
 }
 
-function setMsgGroupClass(wrapper, prevMsg, nextMsg, msg) {
+function setMsgGroupClass(wrapper, prevMsg, nextMsg, msg, isOwn) {
   var gc = getMessageGroupClass(prevMsg, nextMsg, msg);
-  wrapper.className = 'message-wrapper ' + (wrapper.classList.contains('own') ? 'own' : 'other') + ' ' + gc;
+  wrapper.className = 'message-wrapper ' + (isOwn ? 'own' : 'other') + ' ' + gc;
 }
 
 function computePrevMsgData(prevEl) {
@@ -887,7 +887,7 @@ function createMessageElement(msg, prevMsg, nextMsg) {
   const wrapper = document.createElement('div');
   wrapper.dataset.msgId = msg.id;
 
-  setMsgGroupClass(wrapper, prevMsg, nextMsg, msg);
+  setMsgGroupClass(wrapper, prevMsg, nextMsg, msg, isOwn);
 
   let content = '';
 
@@ -992,8 +992,9 @@ function appendMessageToArea(msg, insertBefore, animate) {
   // Update previous message's group class now that it has a new next message
   if (lastWrapper) {
     var prevPrevData = computePrevMsgData(lastWrapper.previousElementSibling);
-    var lastFrom = lastWrapper.classList.contains('own') ? myId : selectedUserId;
-    setMsgGroupClass(lastWrapper, prevPrevData, msg, { from: lastFrom });
+    var lastIsOwn = lastWrapper.classList.contains('own');
+    var lastFrom = lastIsOwn ? myId : selectedUserId;
+    setMsgGroupClass(lastWrapper, prevPrevData, msg, { from: lastFrom }, lastIsOwn);
     lastWrapper.style.animation = 'none';
   }
 }
