@@ -39,7 +39,8 @@ const LOGO_URLS = [
   'https://i.ibb.co/zh2X13NY/image.webp',
   'https://i.ibb.co/67TkWJhv/image.webp',
   'https://i.ibb.co/NdV2Mbtm/image.webp',
-  'https://i.ibb.co/vCwfWVTh/image.webp'
+  'https://i.ibb.co/vCwfWVTh/image.webp',
+  'https://i.ibb.co/gMtLCwHp/image.webp'
 ];
 
 const STUN = {
@@ -1300,7 +1301,7 @@ function switchTab(tab) {
   if (tab === 'chat') {
     document.getElementById('chatPage').classList.add('active');
     document.getElementById('navChat').classList.add('active');
-    document.getElementById('appTitle').textContent = 'Chats';
+    document.getElementById('appTitle').textContent = 'youtube';
   } else if (tab === 'profile') {
     document.getElementById('profilePage').classList.add('active');
     document.getElementById('navProfile').classList.add('active');
