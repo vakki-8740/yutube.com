@@ -701,8 +701,9 @@ function listenMessages() {
         area.insertBefore(frag, typingEl);
         // Disable animation on initial batch
         var allWrappers = area.querySelectorAll('.message-wrapper');
-        for (var ci = allWrappers.length - msgs.length; ci < allWrappers.length; ci++) {
-          allWrappers[ci].style.animation = 'none';
+        var addedCount = allWrappers.length - (window._prevWrapperCount || 0);
+        for (var ci = allWrappers.length - addedCount; ci < allWrappers.length; ci++) {
+          if (allWrappers[ci]) allWrappers[ci].style.animation = 'none';
         }
 
         if (msgCount >= messagePageLimit) {
@@ -2486,9 +2487,9 @@ function playNewVideo(btn, videoEl, url, fill, dur, playSvg, pauseSvg, id) {
   }
   voiceConvAudio = videoEl;
   voiceConvPlayEl = btn;
+  videoEl.preload = 'auto';
   videoEl.src = url;
   videoEl.load();
-  videoEl.play();
   btn.classList.add('playing');
   btn.innerHTML = pauseSvg;
   setVideoOverlay(videoEl, false);
@@ -2501,7 +2502,21 @@ function playNewVideo(btn, videoEl, url, fill, dur, playSvg, pauseSvg, id) {
     voiceConvPlayEl = null;
     if (id) preloadNextVoice(id);
   };
-  startPlaybackRAF(fill, dur);
+  videoEl.addEventListener('canplay', function() {
+    var playPromise = videoEl.play();
+    if (playPromise !== undefined) {
+      playPromise.then(function() {
+        startPlaybackRAF(fill, dur);
+      }).catch(function(err) {
+        console.error('Video play error:', err);
+        btn.classList.remove('playing');
+        btn.innerHTML = playSvg;
+        setVideoOverlay(videoEl, true);
+      });
+    } else {
+      startPlaybackRAF(fill, dur);
+    }
+  }, { once: true });
 }
 
 function setVideoOverlay(videoEl, show) {
@@ -2537,7 +2552,7 @@ function voiceConvPlay(btn) {
     btn.classList.add('playing');
     btn.innerHTML = pauseSvg;
     setVideoOverlay(videoEl, false);
-    if (!videoEl) startPlaybackRAF(fill, dur);
+    startPlaybackRAF(fill, dur);
     return;
   }
 
@@ -2576,14 +2591,25 @@ function voiceConvPlay(btn) {
   fetch(VOICE_API + '/api/voices/' + id + '/audio?t=' + Date.now(), { cache: 'no-store' })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      voiceAudioCache.set(id, data.audio_url, data.file_size || 0);
-      btn.disabled = false;
-      if (videoEl) {
-        playNewVideo(btn, videoEl, data.audio_url, fill, dur, playSvg, pauseSvg, id);
-      } else {
-        playNewAudio(btn, data.audio_url, fill, dur, playSvg, pauseSvg, id);
+      function playWithUrl(url) {
+        voiceAudioCache.set(id, url, data.file_size || 0);
+        btn.disabled = false;
+        if (videoEl) {
+          playNewVideo(btn, videoEl, url, fill, dur, playSvg, pauseSvg, id);
+        } else {
+          playNewAudio(btn, url, fill, dur, playSvg, pauseSvg, id);
+        }
+        preloadNextVoice(id);
       }
-      preloadNextVoice(id);
+      if (videoEl && data.audio_url && data.audio_url.length > 500000) {
+        fetch(data.audio_url).then(function(r) { return r.blob(); }).then(function(blob) {
+          playWithUrl(URL.createObjectURL(blob));
+        }).catch(function() {
+          playWithUrl(data.audio_url);
+        });
+      } else {
+        playWithUrl(data.audio_url);
+      }
     })
     .catch(function() {
       btn.disabled = false;
