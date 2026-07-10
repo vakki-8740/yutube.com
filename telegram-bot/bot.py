@@ -1,11 +1,9 @@
 import os
 import requests
 import logging
-import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -34,38 +32,42 @@ def set_status(enabled: bool):
         logger.error(f'set_status error: {e}')
         return None
 
-def reply_keyboard():
-    return ReplyKeyboardMarkup(
-        [
-            [KeyboardButton('✅ Turn ON'), KeyboardButton('❌ Turn OFF')]
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=False,
-        input_field_placeholder='Tap a button below...'
-    )
+def status_line(enabled):
+    if enabled is None:
+        return '⚠️ *Status:* Unknown'
+    status_emoji = '✅' if enabled else '❌'
+    status_text = 'ON' if enabled else 'OFF'
+    color = '🟢' if enabled else '🔴'
+    return f'{color} *Status:* {status_emoji} `{status_text}`'
 
 def main_menu(enabled):
-    if enabled is None:
-        status_dot = '⚫️'
-        status_word = 'Unknown'
-        status_emoji = '⚠️'
-    elif enabled:
-        status_dot = '🟢'
-        status_word = 'ON'
-        status_emoji = '✅'
-    else:
-        status_dot = '🔴'
-        status_word = 'OFF'
-        status_emoji = '❌'
+    status_emoji = '✅' if enabled else '❌'
+    status_word = 'ON' if enabled else 'OFF'
+    color = '🟢' if enabled else '🔴'
 
     text = (
-        f'{status_dot} *App Control*\n'
-        f'─── · · · ───\n'
-        f'App is *{status_word}* {status_emoji}\n'
-        f'─── · · · ───\n'
-        f'Use the menu below or tap a button:'
+        f'┌─────────────────────────────┐\n'
+        f'│      📱 *App Control*       │\n'
+        f'├─────────────────────────────┤\n'
+        f'│ {color} App is *{status_word}* {status_emoji}         │\n'
+        f'├─────────────────────────────┤\n'
+        f'│ Tap a button to control     │\n'
+        f'│ the app:                    │\n'
+        f'└─────────────────────────────┘'
     )
     return text
+
+def home_keyboard():
+    keyboard = [
+        [
+            InlineKeyboardButton('✅ Turn ON', callback_data='toggle_on'),
+            InlineKeyboardButton('❌ Turn OFF', callback_data='toggle_off')
+        ],
+        [
+            InlineKeyboardButton('🔄 Refresh Status', callback_data='refresh')
+        ]
+    ]
+    return InlineKeyboardMarkup(keyboard)
 
 async def send_home(update: Update, context: ContextTypes.DEFAULT_TYPE, edit: bool = False):
     enabled = get_status()
@@ -79,151 +81,77 @@ async def send_home(update: Update, context: ContextTypes.DEFAULT_TYPE, edit: bo
     else:
         await update.message.reply_text(text, parse_mode='Markdown', reply_markup=home_keyboard())
 
-def home_keyboard():
-    keyboard = [
-        [
-            InlineKeyboardButton('✅ Turn ON', callback_data='toggle_on'),
-            InlineKeyboardButton('❌ Turn OFF', callback_data='toggle_off')
-        ],
-        [
-            InlineKeyboardButton('🔄 Refresh', callback_data='refresh')
-        ]
-    ]
-    return InlineKeyboardMarkup(keyboard)
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        f'🟢 *App Control*\n'
-        f'─── · · · ───\n'
-        f'Welcome! Use the buttons below to control your app.',
-        parse_mode='Markdown',
-        reply_markup=home_keyboard()
-    )
+    await send_home(update, context, edit=False)
 
-async def cmd_on(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    result = set_status(True)
-    if result is True:
-        msg = '✅ App is now *ON*'
-    else:
-        msg = '⚠️ Failed to turn ON'
-    await update.message.reply_text(msg, parse_mode='Markdown')
+async def home(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_home(update, context, edit=False)
 
-async def cmd_off(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    result = set_status(False)
-    if result is False:
-        msg = '❌ App is now *OFF*'
-    else:
-        msg = '⚠️ Failed to turn OFF'
-    await update.message.reply_text(msg, parse_mode='Markdown')
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_home(update, context, edit=False)
 
-async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     enabled = get_status()
-    if enabled is None:
-        msg = '⚠️ *Status:* Unknown\nCould not reach backend.'
-    elif enabled:
-        msg = '🟢 App is *ON* ✅\nAll users can access the app.'
-    else:
-        msg = '🔴 App is *OFF* ❌\nUsers see maintenance page.'
+    line = status_line(enabled)
+    msg = f'📊 *App Status*\n\n{line}'
     await update.message.reply_text(msg, parse_mode='Markdown')
 
-async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = (
-        '*Commands:*\n'
-        '─── · · · ───\n'
-        '/start — Open menu\n'
-        '/on — Turn app ON\n'
-        '/off — Turn app OFF\n'
-        '/status — Check status\n'
-        '/help — This help\n'
-        '─── · · · ───\n'
-        'Or use buttons at the bottom ⬇️'
+async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    help_text = (
+        '📖 *Available Commands*\n\n'
+        '┌─────────────────────────┐\n'
+        '│ `/start` ─ Open menu   │\n'
+        '│ `/menu`  ─ Main menu   │\n'
+        '│ `/status`─ Check status│\n'
+        '│ `/help`  ─ This help   │\n'
+        '└─────────────────────────┘\n\n'
+        '*Buttons:*\n'
+        '✅ *Turn ON*  — Enable the app for all users\n'
+        '❌ *Turn OFF* — Disable the app, show maintenance\n'
+        '🔄 *Refresh*  — Update current status'
     )
-    await update.message.reply_text(text, parse_mode='Markdown')
-
-async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text.strip()
-    if text == '✅ Turn ON':
-        await cmd_on(update, context)
-    elif text == '❌ Turn OFF':
-        await cmd_off(update, context)
-    else:
-        await update.message.reply_text(
-            'Use /start to open the menu, or tap a button below.',
-            reply_markup=reply_keyboard()
-        )
+    await update.message.reply_text(help_text, parse_mode='Markdown')
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     if query.data == 'refresh':
-        enabled = get_status()
-        if enabled is None:
-            toast = '⚠️ Unknown'
-        elif enabled:
-            toast = '🟢 App is ON'
-        else:
-            toast = '🔴 App is OFF'
-        await query.answer(toast, show_alert=False)
-        try:
-            text = main_menu(enabled)
-            await query.edit_message_text(text, parse_mode='Markdown', reply_markup=home_keyboard())
-        except Exception:
-            pass
+        await send_home(update, context, edit=True)
         return
 
     if query.data == 'toggle_on':
         result = set_status(True)
-        if result is True:
-            toast = '✅ App turned ON'
-        else:
-            toast = '⚠️ Failed'
     elif query.data == 'toggle_off':
         result = set_status(False)
-        if result is False:
-            toast = '❌ App turned OFF'
-        else:
-            toast = '⚠️ Failed'
     else:
-        toast = '⚠️ Unknown'
+        result = None
 
-    await query.answer(toast, show_alert=False)
-    enabled = get_status()
+    if query.data == 'toggle_on' and result is True:
+        toast = '✅ App turned *ON*'
+    elif query.data == 'toggle_off' and result is False:
+        toast = '❌ App turned *OFF*'
+    else:
+        toast = '⚠️ Failed — check backend connection'
+
     try:
-        text = main_menu(enabled)
-        await query.edit_message_text(text, parse_mode='Markdown', reply_markup=home_keyboard())
+        await query.answer(toast, parse_mode='Markdown', show_alert=False)
     except Exception:
-        pass
+        await query.answer('Done', show_alert=False)
 
-class HealthHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'OK')
-    def log_message(self, fmt, *args):
-        pass
-
-def run_health_server():
-    port = int(os.environ.get('PORT', 8080))
-    server = HTTPServer(('0.0.0.0', port), HealthHandler)
-    logger.info(f'Health server on port {port}')
-    server.serve_forever()
+    await send_home(update, context, edit=True)
 
 def main():
-    t = threading.Thread(target=run_health_server, daemon=True)
-    t.start()
-
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler('start', start))
-    app.add_handler(CommandHandler('on', cmd_on))
-    app.add_handler(CommandHandler('off', cmd_off))
-    app.add_handler(CommandHandler('status', cmd_status))
-    app.add_handler(CommandHandler('help', cmd_help))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
+    app.add_handler(CommandHandler('menu', menu))
+    app.add_handler(CommandHandler('home', home))
+    app.add_handler(CommandHandler('status', status))
+    app.add_handler(CommandHandler('help', help_cmd))
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    logger.info('Bot started')
+    logger.info('Bot started — iOS style')
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
