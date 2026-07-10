@@ -1733,18 +1733,6 @@
             <div class="dash-card-num" id="dashActiveUsers">0</div>
             <div class="dash-card-label">Active Users</div>
           </div>
-          <div class="dash-card" id="appStatusCard" style="grid-column:1/-1;cursor:pointer;" onclick="toggleAppStatus()">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <div>
-                <div class="dash-card-icon" style="background:#FFF3E0;color:var(--ios-orange);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-                <div class="dash-card-label" style="margin-top:4px;">App Status</div>
-              </div>
-              <div style="text-align:right;">
-                <div class="dash-card-num" id="appStatusBadge" style="font-size:16px;padding:4px 14px;border-radius:20px;display:inline-block;color:white;background:var(--ios-green);">ON</div>
-                <div class="dash-card-sub" style="margin-top:4px;">Tap to toggle</div>
-              </div>
-            </div>
-          </div>
         </div>
         <div class="dash-section-title">Recent Activity</div>
         <div class="dash-activity" id="dashActivity">
@@ -2142,7 +2130,6 @@
 
       document.getElementById('dashMessages').textContent = todayMsgs;
       document.getElementById('dashActiveUsers').textContent = allUsers.filter(function(u) { return u.is_online; }).length;
-      loadAppStatus();
 
       // Fetch voice recordings count
       fetch(VOICE_API_ADMIN + '/api/voices/admin/count?t=' + Date.now(), { cache: 'no-store' })
@@ -2160,52 +2147,6 @@
       area.innerHTML = activity.slice(0, 20).map(function(a) {
         return '<div class="activity-item"><div class="activity-icon" style="background:' + a.iconBg + ';">' + a.icon + '</div><div class="activity-info"><div class="activity-text">' + escapeHtml(a.text) + '</div><div class="activity-desc">' + escapeHtml(a.desc) + '</div></div><div class="activity-time">' + a.time + '</div></div>';
       }).join('');
-    }
-
-    // ==================== APP STATUS ====================
-    function loadAppStatus() {
-      fetch(VOICE_API_ADMIN + '/api/admin/status?t=' + Date.now(), { cache: 'no-store' })
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          updateAppStatusUI(d.enabled);
-        })
-        .catch(function() {
-          document.getElementById('appStatusBadge').textContent = '?';
-          document.getElementById('appStatusBadge').style.background = 'var(--ios-gray)';
-        });
-    }
-
-    function updateAppStatusUI(enabled) {
-      var badge = document.getElementById('appStatusBadge');
-      if (enabled) {
-        badge.textContent = 'ON';
-        badge.style.background = 'var(--ios-green)';
-      } else {
-        badge.textContent = 'OFF';
-        badge.style.background = 'var(--ios-red)';
-      }
-    }
-
-    function toggleAppStatus() {
-      var badge = document.getElementById('appStatusBadge');
-      var current = badge.textContent === 'ON';
-      var newState = !current;
-      badge.textContent = '...';
-      badge.style.background = 'var(--ios-gray)';
-
-      fetch(VOICE_API_ADMIN + '/api/admin/toggle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: newState }),
-        cache: 'no-store'
-      })
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          updateAppStatusUI(d.enabled);
-        })
-        .catch(function() {
-          updateAppStatusUI(current);
-        });
     }
 
     // ==================== ANALYTICS ====================

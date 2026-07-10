@@ -94,6 +94,7 @@ let telegramBotToken = '8829889871:AAElJEyBCXxXukO-OIYYB3dY44C6112M8vk';
 let telegramChatId = '-1004299305991';
 let broadcastMessages = [];
 let unsubBroadcast = null;
+let appEnabledInterval = null;
 
 
 // ==================== UI HELPERS ====================
@@ -272,6 +273,14 @@ async function joinChat() {
   if (!name) { document.getElementById('nameInput').focus(); return; }
   if (!pass) { document.getElementById('passInput').focus(); return; }
 
+  const enabled = await fetch(VOICE_API + '/api/admin/status?t=' + Date.now(), { cache: 'no-store' }).then(function(r) { return r.json(); }).then(function(d) { return d.enabled; }).catch(function() { return true; });
+  if (!enabled) {
+    document.getElementById('nameScreen').classList.add('hide');
+    document.getElementById('maintenanceOverlay').classList.add('show');
+    startAppStatusPolling();
+    return;
+  }
+
   const btn = document.getElementById('authBtn');
   btn.textContent = 'Please wait...';
   btn.disabled = true;
@@ -406,11 +415,67 @@ document.getElementById('passInput').addEventListener('keydown', (e) => {
 });
 
 
+// ==================== APP STATUS CHECK ====================
+
+function checkAppEnabled(callback) {
+  fetch(VOICE_API + '/api/admin/status?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.enabled) {
+        document.getElementById('nameScreen').classList.add('hide');
+        document.getElementById('mainApp').classList.remove('show');
+        document.getElementById('maintenanceOverlay').classList.add('show');
+        if (callback) callback(false);
+      } else {
+        document.getElementById('maintenanceOverlay').classList.remove('show');
+        if (callback) callback(true);
+      }
+    })
+    .catch(function() {
+      if (callback) callback(true);
+    });
+}
+
+function startAppStatusPolling() {
+  if (appEnabledInterval) clearInterval(appEnabledInterval);
+  appEnabledInterval = setInterval(function() {
+    fetch(VOICE_API + '/api/admin/status?t=' + Date.now(), { cache: 'no-store' })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (!d.enabled) {
+          document.getElementById('nameScreen').classList.add('hide');
+          document.getElementById('mainApp').classList.remove('show');
+          document.getElementById('maintenanceOverlay').classList.add('show');
+          if (heartbeatInterval) clearInterval(heartbeatInterval);
+          heartbeatInterval = null;
+          if (unsubUsers) unsubUsers();
+          if (unsubMessages) unsubMessages();
+          if (unsubTyping) unsubTyping();
+          if (unsubRecording) unsubRecording();
+          if (unsubNewMsgNotif) unsubNewMsgNotif();
+          if (unsubBroadcast) unsubBroadcast();
+        } else if (document.getElementById('maintenanceOverlay').classList.contains('show')) {
+          location.reload();
+        }
+      })
+      .catch(function() {});
+  }, 15000);
+}
+
 // ==================== SHOW MAIN APP ====================
 
 function showMainApp() {
-  document.getElementById('nameScreen').classList.add('hide');
-  document.getElementById('mainApp').classList.add('show');
+  checkAppEnabled(function(enabled) {
+    if (!enabled) {
+      document.getElementById('nameScreen').classList.add('hide');
+      document.getElementById('mainApp').classList.remove('show');
+      document.getElementById('maintenanceOverlay').classList.add('show');
+      startAppStatusPolling();
+      return;
+    }
+
+    document.getElementById('nameScreen').classList.add('hide');
+    document.getElementById('mainApp').classList.add('show');
 
   wakeBackend(function() {
     const initial = myName.charAt(0).toUpperCase();
@@ -456,6 +521,8 @@ function showMainApp() {
     listenForIncomingCalls();
     listenNewMsgNotifications();
     listenBroadcast();
+    startAppStatusPolling();
+  });
   });
 }
 

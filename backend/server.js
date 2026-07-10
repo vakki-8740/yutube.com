@@ -7,7 +7,6 @@ const voicePacksRouter = require('./routes/voicePacks');
 const imagesRouter = require('./routes/images');
 const voicesRouter = require('./routes/voices');
 const appControlRouter = require('./routes/appControl');
-const { startBot } = require('./telegramBot');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,7 +33,6 @@ app.get('/api/health', (req, res) => {
 async function start() {
   try {
     await initDb();
-    startBot(process.env.TELEGRAM_BOT_TOKEN);
     app.listen(PORT, () => {
       console.log('Voice pack server running on port ' + PORT);
     });
