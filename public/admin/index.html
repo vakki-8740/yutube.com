@@ -953,6 +953,69 @@
       letter-spacing: 0.3px;
     }
 
+  /* ==================== ACTIVITY LOG ==================== */
+    .actlog-filters button {
+      padding: 4px 12px;
+      border: none;
+      border-radius: 12px;
+      background: var(--ios-gray6);
+      color: var(--ios-gray);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .actlog-filters button.active {
+      background: var(--ios-blue);
+      color: white;
+    }
+    .actlog-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 0.5px solid var(--ios-separator);
+      transition: background 0.15s;
+    }
+    .actlog-item:hover { background: var(--ios-gray6); }
+    .actlog-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+    .actlog-body { flex: 1; min-width: 0; }
+    .actlog-user { font-size: 14px; font-weight: 600; }
+    .actlog-detail { font-size: 12px; color: var(--ios-gray); margin-top: 2px; }
+    .actlog-time { font-size: 11px; color: var(--ios-gray2); margin-top: 2px; }
+
+  /* ==================== DEVICE LOG ==================== */
+    .devlog-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 0.5px solid var(--ios-separator);
+    }
+    .devlog-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+    .devlog-body { flex: 1; min-width: 0; }
+    .devlog-device { font-size: 14px; font-weight: 600; }
+    .devlog-platform { font-size: 12px; color: var(--ios-gray); margin-top: 2px; }
+    .devlog-meta { font-size: 11px; color: var(--ios-gray2); margin-top: 2px; display: flex; gap: 12px; }
+
   /* ==================== USER DETAIL TABS ==================== */
     .detail-tabs {
       display: flex;
@@ -1669,6 +1732,7 @@
           <button class="admin-tab active" onclick="switchAdminTab('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</button>
           <button class="admin-tab" onclick="switchAdminTab('users')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Users</button>
           <button class="admin-tab" onclick="switchAdminTab('analytics')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Analytics</button>
+          <button class="admin-tab" onclick="switchAdminTab('activitylog')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Activity Log</button>
         </div>
       </div>
 
@@ -1736,6 +1800,24 @@
       <div class="tab-content" id="tabAnalytics">
         <div class="analytics-section" id="analyticsSection"></div>
       </div>
+
+      <!-- Activity Log Tab -->
+      <div class="tab-content" id="tabActivitylog">
+        <div class="search-box">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="activitySearchInput" placeholder="Search by user or device..." oninput="filterActivityLog()">
+          </div>
+        </div>
+        <div class="actlog-filters" style="display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid var(--ios-gray5);flex-wrap:wrap;">
+          <button class="actlog-filter active" onclick="setActLogFilter('all',this)">All</button>
+          <button class="actlog-filter" onclick="setActLogFilter('signup',this)">Signups</button>
+          <button class="actlog-filter" onclick="setActLogFilter('login',this)">Logins</button>
+        </div>
+        <div id="activityLogList" style="flex:1;overflow-y:auto;padding:8px 0;">
+          <div class="no-users"><div class="icon">⏳</div><div>Loading activity log...</div></div>
+        </div>
+      </div>
     </div>
 
     <!-- Chat Area -->
@@ -1772,6 +1854,7 @@
           <button class="detail-tab" onclick="switchDetailTab('activity',this)">Activity</button>
           <button class="detail-tab" onclick="switchDetailTab('messages',this)">Messages</button>
           <button class="detail-tab" onclick="switchDetailTab('voice',this)">Voice</button>
+          <button class="detail-tab" onclick="switchDetailTab('devices',this)">Devices</button>
         </div>
 
         <!-- Info Tab -->
@@ -1781,6 +1864,8 @@
             <div class="detail-row"><span class="detail-label">Username</span><span class="detail-value" id="detailUsername">-</span></div>
             <div class="detail-row"><span class="detail-label">Joined</span><span class="detail-value" id="detailJoined">-</span></div>
             <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" id="detailStatus">-</span></div>
+            <div class="detail-row"><span class="detail-label">Last Device</span><span class="detail-value" id="detailDevice" style="font-size:11px;word-break:break-all;">-</span></div>
+            <div class="detail-row"><span class="detail-label">Platform</span><span class="detail-value" id="detailPlatform">-</span></div>
           </div>
         </div>
 
@@ -1802,6 +1887,16 @@
         <!-- Voice Tab -->
         <div class="detail-tab-content" id="detailTabVoice" style="overflow-y:auto;flex:1;">
           <div class="detail-messages" id="detailVoicePacks"><div class="no-msgs">Loading voice packs...</div></div>
+        </div>
+
+        <!-- Devices Tab -->
+        <div class="detail-tab-content" id="detailTabDevices" style="overflow-y:auto;flex:1;">
+          <div class="activity-stats" id="deviceStats">
+            <div class="activity-stat-card"><div class="activity-stat-num" id="devTotalLogins">0</div><div class="activity-stat-label">Total Logins</div></div>
+            <div class="activity-stat-card"><div class="activity-stat-num" id="devDevices">0</div><div class="activity-stat-label">Devices</div></div>
+            <div class="activity-stat-card"><div class="activity-stat-num" id="devSince">-</div><div class="activity-stat-label">First Seen</div></div>
+          </div>
+          <div id="deviceLogList" style="padding:0 12px;"><div class="no-msgs">Loading device history...</div></div>
         </div>
       </div>
     </div>
@@ -2024,6 +2119,7 @@
       document.querySelector('.admin-tab[onclick*="' + tab + '"]').classList.add('active');
       document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
       if (tab === 'analytics') updateAnalytics();
+      if (tab === 'activitylog') loadActivityLog();
     }
 
     // ==================== DETAIL TAB SWITCHING ====================
@@ -2186,6 +2282,9 @@
         document.getElementById('detailJoined').textContent = '-';
       }
 
+      document.getElementById('detailDevice').textContent = user.last_device ? (user.last_device.length > 80 ? user.last_device.substring(0, 80) + '...' : user.last_device) : '-';
+      document.getElementById('detailPlatform').textContent = user.last_platform || '-';
+
       // Block button state
       const blockBtn = document.getElementById('blockBtn');
       const blockText = document.getElementById('blockBtnText');
@@ -2200,6 +2299,7 @@
       loadUserMessages(user.id);
       loadVoicePacksForUser(user.id);
       loadUserActivityStats(user.id);
+      loadUserDeviceLog(user.id);
     }
 
     // ==================== USER ACTIVITY STATS ====================
@@ -2420,6 +2520,116 @@
       var pct = Math.max(0, Math.min(1, x / rect.width));
       var dur = parseFloat(bar.dataset.dur) || 0;
       adminVoiceAudio.currentTime = pct * dur;
+    }
+
+    // ==================== ACTIVITY LOG ====================
+    var allActivityLogs = [];
+    var actLogFilter = 'all';
+
+    function setActLogFilter(filter, btn) {
+      actLogFilter = filter;
+      document.querySelectorAll('.actlog-filter').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      renderActivityLog();
+    }
+
+    function loadActivityLog() {
+      db.collection('login_activity').orderBy('timestamp', 'desc').get()
+        .then(function(snap) {
+          allActivityLogs = [];
+          snap.forEach(function(doc) { allActivityLogs.push({ id: doc.id, ...doc.data() }); });
+          renderActivityLog();
+        })
+        .catch(function() {
+          document.getElementById('activityLogList').innerHTML = '<div class="no-users"><div class="icon">⚠️</div><div>Failed to load activity log</div></div>';
+        });
+    }
+
+    function renderActivityLog() {
+      var list = document.getElementById('activityLogList');
+      var filtered = allActivityLogs.filter(function(a) {
+        if (actLogFilter !== 'all' && a.type !== actLogFilter) return false;
+        var q = (document.getElementById('activitySearchInput').value || '').toLowerCase();
+        if (!q) return true;
+        var userName = '';
+        var user = allUsers.find(function(u) { return u.id === a.userId; });
+        if (user) userName = user.name || user.username || '';
+        return userName.toLowerCase().includes(q) || (a.userAgent || '').toLowerCase().includes(q) || (a.platform || '').toLowerCase().includes(q);
+      });
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="no-users"><div class="icon">📭</div><div>No activity found</div></div>';
+        return;
+      }
+      var html = '';
+      filtered.forEach(function(a) {
+        var ts = a.timestamp?.toDate?.() || new Date();
+        var timeStr = ts.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        var isSignup = a.type === 'signup';
+        var icon = isSignup ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
+        var iconBg = isSignup ? '#E8F5E9' : '#E3F2FD';
+        var iconColor = isSignup ? 'var(--ios-green)' : 'var(--ios-blue)';
+        var userObj = allUsers.find(function(u) { return u.id === a.userId; });
+        var userName = userObj ? escapeHtml(userObj.name || userObj.username || 'Unknown') : escapeHtml(a.userId || 'Unknown');
+        var device = a.userAgent ? a.userAgent.substring(0, 60) + (a.userAgent.length > 60 ? '...' : '') : 'Unknown device';
+        var platform = a.platform || '';
+        var screenInfo = a.screenSize || '';
+        var lang = a.language || '';
+        var detailParts = [];
+        if (platform) detailParts.push(platform);
+        if (screenInfo) detailParts.push(screenInfo);
+        if (lang) detailParts.push(lang);
+        var detail = detailParts.join(' · ');
+        html += '<div class="actlog-item"><div class="actlog-icon" style="background:' + iconBg + ';color:' + iconColor + ';">' + icon + '</div><div class="actlog-body"><div class="actlog-user">' + userName + ' <span style="font-weight:400;color:var(--ios-gray2);font-size:12px;">' + (isSignup ? 'signed up' : 'logged in') + '</span></div><div class="actlog-detail" title="' + escapeHtml(a.userAgent || '') + '">' + escapeHtml(device) + '</div><div class="actlog-detail">' + escapeHtml(detail) + '</div><div class="actlog-time">' + timeStr + '</div></div></div>';
+      });
+      list.innerHTML = html;
+    }
+
+    function filterActivityLog() { renderActivityLog(); }
+
+    // ==================== DEVICE LOG ====================
+    function loadUserDeviceLog(userId) {
+      var statsArea = document.getElementById('deviceStats');
+      var listArea = document.getElementById('deviceLogList');
+      listArea.innerHTML = '<div class="no-msgs">Loading device history...</div>';
+
+      db.collection('login_activity').where('userId', '==', userId).orderBy('timestamp', 'desc').get()
+        .then(function(snap) {
+          var logs = [];
+          snap.forEach(function(doc) { logs.push({ id: doc.id, ...doc.data() }); });
+          if (logs.length === 0) {
+            statsArea.style.display = 'none';
+            listArea.innerHTML = '<div class="no-msgs">No login activity recorded yet for this user</div>';
+            return;
+          }
+          statsArea.style.display = 'flex';
+          document.getElementById('devTotalLogins').textContent = logs.length;
+          var uniqueDevices = new Set();
+          logs.forEach(function(l) { if (l.userAgent) uniqueDevices.add(l.userAgent); });
+          document.getElementById('devDevices').textContent = uniqueDevices.size;
+          var first = logs[logs.length - 1];
+          var firstTs = first.timestamp?.toDate?.() || null;
+          document.getElementById('devSince').textContent = firstTs ? firstTs.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+
+          var html = '<div style="font-size:12px;color:var(--ios-gray2);padding:8px 0 4px;font-weight:600;">LOGIN HISTORY (' + logs.length + ' events)</div>';
+          logs.forEach(function(l) {
+            var ts = l.timestamp?.toDate?.() || new Date();
+            var timeStr = ts.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            var isSignup = l.type === 'signup';
+            var typeLabel = isSignup ? 'Account Created' : 'Login';
+            var icon = isSignup ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
+            var iconBg = isSignup ? '#E8F5E9' : '#E3F2FD';
+            var iconColor = isSignup ? 'var(--ios-green)' : 'var(--ios-blue)';
+            var device = l.userAgent ? l.userAgent.split(' ').slice(0, 4).join(' ') : 'Unknown';
+            var platform = l.platform || '';
+            var screenInfo = l.screenSize || '';
+            var lang = l.language || '';
+            html += '<div class="devlog-item"><div class="devlog-icon" style="background:' + iconBg + ';color:' + iconColor + ';">' + icon + '</div><div class="devlog-body"><div class="devlog-device">' + escapeHtml(device) + ' <span style="font-weight:400;color:var(--ios-gray2);font-size:11px;">' + typeLabel + '</span></div><div class="devlog-platform">' + escapeHtml(platform) + (screenInfo ? ' · ' + escapeHtml(screenInfo) : '') + (lang ? ' · ' + escapeHtml(lang) : '') + '</div><div class="devlog-meta"><span>' + timeStr + '</span></div></div></div>';
+          });
+          listArea.innerHTML = html;
+        })
+        .catch(function() {
+          listArea.innerHTML = '<div class="no-msgs">Failed to load device log</div>';
+        });
     }
 
     // ==================== BLOCK USER ====================

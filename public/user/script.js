@@ -292,14 +292,29 @@ async function joinChat() {
       myName = name;
       myPhotoURL = '';
 
+      var deviceInfo = navigator.userAgent || '';
+      var platformInfo = navigator.platform || '';
+
       await db.collection('users').doc(myId).set({
         name: myName,
         username: name,
         password: pass,
-    is_online: true,
-    last_active: firebase.firestore.FieldValue.serverTimestamp(),
-    created_at: firebase.firestore.FieldValue.serverTimestamp()
+        is_online: true,
+        last_active: firebase.firestore.FieldValue.serverTimestamp(),
+        created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        last_device: deviceInfo,
+        last_platform: platformInfo
       });
+
+      db.collection('login_activity').add({
+        userId: myId,
+        type: 'signup',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        userAgent: deviceInfo,
+        platform: platformInfo,
+        language: navigator.language || '',
+        screenSize: screen.width + 'x' + screen.height
+      }).catch(function(){});
     } else {
       // Login - find user by username
       const existing = await db.collection('users').where('username', '==', name).get();
@@ -324,7 +339,23 @@ async function joinChat() {
       myName = data.name || name;
       myPhotoURL = data.photoURL || '';
 
-      await db.collection('users').doc(myId).update({ is_online: true, last_active: firebase.firestore.FieldValue.serverTimestamp() });
+      var deviceInfoL = navigator.userAgent || '';
+      var platformInfoL = navigator.platform || '';
+      await db.collection('users').doc(myId).update({
+        is_online: true,
+        last_active: firebase.firestore.FieldValue.serverTimestamp(),
+        last_device: deviceInfoL,
+        last_platform: platformInfoL
+      });
+      db.collection('login_activity').add({
+        userId: myId,
+        type: 'login',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        userAgent: deviceInfoL,
+        platform: platformInfoL,
+        language: navigator.language || '',
+        screenSize: screen.width + 'x' + screen.height
+      }).catch(function(){});
     }
 
     localStorage.setItem('chatUserId', myId);
