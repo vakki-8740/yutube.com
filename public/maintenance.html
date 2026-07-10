@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>App Offline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+      background: #F2F2F7;
+      color: #000;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    .maintenance-box {
+      text-align: center;
+      padding: 40px 24px;
+      max-width: 340px;
+    }
+    .icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #FF9500, #FF3B30);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 40px;
+      box-shadow: 0 8px 32px rgba(255, 59, 48, 0.25);
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 15px;
+      color: #8E8E93;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .status-badge {
+      display: inline-block;
+      background: #FF3B30;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .footer {
+      font-size: 12px;
+      color: #AEAEB2;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="maintenance-box">
+    <div class="icon">🔧</div>
+    <div class="status-badge">Under Maintenance</div>
+    <h1>App is Unavailable</h1>
+    <p>The app is currently under maintenance. Please check back later.</p>
+    <div class="footer">We'll be back soon</div>
+  </div>
+</body>
+</html>

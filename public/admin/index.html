@@ -954,21 +954,6 @@
     }
 
   /* ==================== ACTIVITY LOG ==================== */
-    .actlog-filters button {
-      padding: 4px 12px;
-      border: none;
-      border-radius: 12px;
-      background: var(--ios-gray6);
-      color: var(--ios-gray);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .actlog-filters button.active {
-      background: var(--ios-blue);
-      color: white;
-    }
     .actlog-item {
       display: flex;
       align-items: flex-start;
@@ -1809,10 +1794,12 @@
             <input type="text" class="search-input" id="activitySearchInput" placeholder="Search by user or device..." oninput="filterActivityLog()">
           </div>
         </div>
-        <div class="actlog-filters" style="display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid var(--ios-gray5);flex-wrap:wrap;">
-          <button class="actlog-filter active" onclick="setActLogFilter('all',this)">All</button>
-          <button class="actlog-filter" onclick="setActLogFilter('signup',this)">Signups</button>
-          <button class="actlog-filter" onclick="setActLogFilter('login',this)">Logins</button>
+        <div style="padding:8px 12px;border-bottom:1px solid var(--ios-gray5);">
+          <select id="actLogFilterSelect" onchange="setActLogFilter(this.value)" style="width:100%;padding:8px 10px;border:1px solid var(--ios-separator);border-radius:8px;background:var(--ios-card);color:var(--text);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;">
+            <option value="all">All Activity</option>
+            <option value="signup">Signups Only</option>
+            <option value="login">Logins Only</option>
+          </select>
         </div>
         <div id="activityLogList" style="flex:1;overflow-y:auto;padding:8px 0;">
           <div class="no-users"><div class="icon">⏳</div><div>Loading activity log...</div></div>
@@ -1849,12 +1836,14 @@
           </button>
         </div>
 
-        <div class="detail-tabs">
-          <button class="detail-tab active" onclick="switchDetailTab('info',this)">Info</button>
-          <button class="detail-tab" onclick="switchDetailTab('activity',this)">Activity</button>
-          <button class="detail-tab" onclick="switchDetailTab('messages',this)">Messages</button>
-          <button class="detail-tab" onclick="switchDetailTab('voice',this)">Voice</button>
-          <button class="detail-tab" onclick="switchDetailTab('devices',this)">Devices</button>
+        <div style="padding:8px 16px;">
+          <select id="detailTabSelect" onchange="switchDetailTabMenu(this.value)" style="width:100%;padding:8px 10px;border:1px solid var(--ios-separator);border-radius:8px;background:var(--ios-card);color:var(--text);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;">
+            <option value="info">Info</option>
+            <option value="activity">Activity</option>
+            <option value="messages">Messages</option>
+            <option value="voice">Voice</option>
+            <option value="devices">Devices</option>
+          </select>
         </div>
 
         <!-- Info Tab -->
@@ -2130,6 +2119,15 @@
       btn.classList.add('active');
       var contentId = 'detailTab' + tab.charAt(0).toUpperCase() + tab.slice(1);
       var content = parent.querySelector('#' + contentId);
+      if (content) content.classList.add('active');
+      var sel = document.getElementById('detailTabSelect');
+      if (sel) sel.value = tab;
+    }
+
+    function switchDetailTabMenu(tab) {
+      document.querySelectorAll('.detail-tab-content').forEach(function(t) { t.classList.remove('active'); });
+      var contentId = 'detailTab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+      var content = document.getElementById(contentId);
       if (content) content.classList.add('active');
     }
 
@@ -2526,10 +2524,8 @@
     var allActivityLogs = [];
     var actLogFilter = 'all';
 
-    function setActLogFilter(filter, btn) {
+    function setActLogFilter(filter) {
       actLogFilter = filter;
-      document.querySelectorAll('.actlog-filter').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
       renderActivityLog();
     }
 
