@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -19,7 +20,7 @@ def get_status():
         data = r.json()
         return data.get('enabled', True)
     except Exception as e:
-        logger.error(f'Failed to get status: {e}')
+        logger.error(f'get_status error: {e}')
         return None
 
 def set_status(enabled: bool):
@@ -28,87 +29,129 @@ def set_status(enabled: bool):
         data = r.json()
         return data.get('enabled')
     except Exception as e:
-        logger.error(f'Failed to set status: {e}')
+        logger.error(f'set_status error: {e}')
         return None
 
-def get_keyboard():
+def status_line(enabled):
+    if enabled is None:
+        return '⚠️ *Status:* Unknown'
+    status_emoji = '✅' if enabled else '❌'
+    status_text = 'ON' if enabled else 'OFF'
+    color = '🟢' if enabled else '🔴'
+    return f'{color} *Status:* {status_emoji} `{status_text}`'
+
+def main_menu(enabled):
+    status_emoji = '✅' if enabled else '❌'
+    status_word = 'ON' if enabled else 'OFF'
+    color = '🟢' if enabled else '🔴'
+
+    text = (
+        f'┌─────────────────────────────┐\n'
+        f'│      📱 *App Control*       │\n'
+        f'├─────────────────────────────┤\n'
+        f'│ {color} App is *{status_word}* {status_emoji}         │\n'
+        f'├─────────────────────────────┤\n'
+        f'│ Tap a button to control     │\n'
+        f'│ the app:                    │\n'
+        f'└─────────────────────────────┘'
+    )
+    return text
+
+def home_keyboard():
     keyboard = [
         [
-            InlineKeyboardButton('✅ ON', callback_data='toggle_on'),
-            InlineKeyboardButton('❌ OFF', callback_data='toggle_off')
+            InlineKeyboardButton('✅ Turn ON', callback_data='toggle_on'),
+            InlineKeyboardButton('❌ Turn OFF', callback_data='toggle_off')
+        ],
+        [
+            InlineKeyboardButton('🔄 Refresh Status', callback_data='refresh')
         ]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def send_home(update: Update, context: ContextTypes.DEFAULT_TYPE, edit: bool = False):
     enabled = get_status()
-    if enabled is None:
-        status_text = '⚠️ Unable to fetch status'
-    elif enabled:
-        status_text = '✅ App is currently ON'
-    else:
-        status_text = '❌ App is currently OFF'
+    text = main_menu(enabled)
 
-    await update.message.reply_text(
-        f'*App Control Bot*\n\n{status_text}\n\nUse the buttons below to turn the app ON or OFF:',
-        parse_mode='Markdown',
-        reply_markup=get_keyboard()
+    if edit:
+        try:
+            await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=home_keyboard())
+        except Exception:
+            await update.callback_query.message.reply_text(text, parse_mode='Markdown', reply_markup=home_keyboard())
+    else:
+        await update.message.reply_text(text, parse_mode='Markdown', reply_markup=home_keyboard())
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_home(update, context, edit=False)
+
+async def home(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_home(update, context, edit=False)
+
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_home(update, context, edit=False)
+
+async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    enabled = get_status()
+    line = status_line(enabled)
+    msg = f'📊 *App Status*\n\n{line}'
+    await update.message.reply_text(msg, parse_mode='Markdown')
+
+async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    help_text = (
+        '📖 *Available Commands*\n\n'
+        '┌─────────────────────────┐\n'
+        '│ `/start` ─ Open menu   │\n'
+        '│ `/menu`  ─ Main menu   │\n'
+        '│ `/status`─ Check status│\n'
+        '│ `/help`  ─ This help   │\n'
+        '└─────────────────────────┘\n\n'
+        '*Buttons:*\n'
+        '✅ *Turn ON*  — Enable the app for all users\n'
+        '❌ *Turn OFF* — Disable the app, show maintenance\n'
+        '🔄 *Refresh*  — Update current status'
     )
+    await update.message.reply_text(help_text, parse_mode='Markdown')
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
+    if query.data == 'refresh':
+        await send_home(update, context, edit=True)
+        return
+
     if query.data == 'toggle_on':
         result = set_status(True)
-        if result is True:
-            status_text = '✅ App is now *ON*'
-        else:
-            status_text = '⚠️ Failed to turn ON'
     elif query.data == 'toggle_off':
         result = set_status(False)
-        if result is False:
-            status_text = '❌ App is now *OFF*'
-        else:
-            status_text = '⚠️ Failed to turn OFF'
     else:
-        status_text = '⚠️ Unknown action'
+        result = None
 
-    enabled = get_status()
-    if enabled is None:
-        current_status = '⚠️ Unable to fetch status'
-    elif enabled:
-        current_status = '✅ App is ON'
+    if query.data == 'toggle_on' and result is True:
+        toast = '✅ App turned *ON*'
+    elif query.data == 'toggle_off' and result is False:
+        toast = '❌ App turned *OFF*'
     else:
-        current_status = '❌ App is OFF'
+        toast = '⚠️ Failed — check backend connection'
 
     try:
-        await query.edit_message_text(
-            f'*App Control Bot*\n\n{current_status}\n\nUse the buttons below to turn the app ON or OFF:',
-            parse_mode='Markdown',
-            reply_markup=get_keyboard()
-        )
-    except Exception as e:
-        logger.error(f'Failed to edit message: {e}')
-        await query.message.reply_text(status_text, parse_mode='Markdown')
+        await query.answer(toast, parse_mode='Markdown', show_alert=False)
+    except Exception:
+        await query.answer('Done', show_alert=False)
 
-async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    enabled = get_status()
-    if enabled is None:
-        await update.message.reply_text('⚠️ Unable to fetch app status.')
-    elif enabled:
-        await update.message.reply_text('✅ App is currently *ON*', parse_mode='Markdown')
-    else:
-        await update.message.reply_text('❌ App is currently *OFF*', parse_mode='Markdown')
+    await send_home(update, context, edit=True)
 
 def main():
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler('start', start))
+    app.add_handler(CommandHandler('menu', menu))
+    app.add_handler(CommandHandler('home', home))
     app.add_handler(CommandHandler('status', status))
+    app.add_handler(CommandHandler('help', help_cmd))
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    logger.info('Bot started. Polling...')
+    logger.info('Bot started — iOS style')
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
